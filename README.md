@@ -23,3 +23,9 @@ $ catkin_make
 $ source devel/setup.bash
 ```
 
+## Running UR10 simulation in gazebo
+build, source and run in two terminals:
+'''
+roslaunch rob8 ur10_bringup.launch
+roslaunch rob8 ur10_controllers.launch
+'''
