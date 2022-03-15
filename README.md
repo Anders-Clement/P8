@@ -3,6 +3,13 @@
 
 ## Installation instructions
 
+ROS installation: 
+install ros-noetic-desktop-full as per the instructions on the ROS wiki site
+
+additional installs:
+sudo apt install ros-noetic-rosbridge-suite
+sudo apt install ros-noetic-moveit
+
 UR10 repositories must be installed after cloning, do the following from the root of this workspace:
 ```
 # clone the driver
@@ -23,3 +30,9 @@ $ catkin_make
 $ source devel/setup.bash
 ```
 
+## Running UR10 simulation in gazebo
+build, source and run in two terminals:
+```
+roslaunch rob8 ur10_bringup.launch
+roslaunch rob8 ur10_controllers.launch
+```

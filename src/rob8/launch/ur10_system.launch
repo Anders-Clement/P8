@@ -1,7 +1,0 @@
-<launch>
-    <include file="$(find ur_gazebo)/launch/ur10_bringup.launch" />
-    <include file="$(find ur10_moveit_config)/launch/ur10_moveit_planning_execution.launch" >
-        <arg name="sim" value="true" />
-    </include>
-    <include file="$(find ur10_moveit_config)/launch/moveit_rviz.launch" />
-</launch>
