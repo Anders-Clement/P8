@@ -8,5 +8,10 @@
     </include>
     <!-- small node, which adds the floor to the planning scene -->
     <node pkg="rob8" type="planning_scene_setup.py" name="planning_scene_setup"/>
+
+    <!-- rosbridge_server to connect with unity -->
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+        <arg name="address" value="ubuntu.local"/>
+    </include> 
 </launch>    
     
