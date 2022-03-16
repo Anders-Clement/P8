@@ -1,18 +1,129 @@
 #! /bin/python3
 
-from msilib.schema import Class
 import sys
 import copy
-
-from tomlkit import string
 import rospy
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
-from math import pi
 from std_msgs.msg import String, Int8MultiArray
+from geometry_msgs.msg import PoseStamped
+from visualization_msgs.msg import Marker
 from rob8.msg import boxes
 from moveit_commander.conversions import pose_to_list
+
+class display_object:
+    def __init__(self, pose, scale, type, move_group, robot, previouse_pose) -> None:
+        self.goto_plan = None
+        self.plans = []
+        self.pose = pose #This pose in cartesian space
+        self.type = type
+        self.scale = scale
+        self.previouse_pose = previouse_pose #Previosue pose is in joint_state
+        #Moveit commander parameters
+        self.move_group_ref = move_group
+        self.robot_ref = robot
+
+        new_pose = copy.deepcopy(self.pose)
+        new_pose.position.x = self.pose.position.x + self.scale[0] / 2
+        new_pose.position.y = self.pose.position.y + self.scale[1] / 2
+        new_pose.position.z = self.pose.position.z + self.scale[2] + 0.05
+        self.pose_above_box = new_pose
+
+        self.calculate_plans()
+
+    def calculate_plans(self):
+        #Position above the virtual box
+        old_robot_state = copy.deepcopy(self.previouse_pose)
+        self.move_group_ref.set_start_state(old_robot_state)
+        self.move_group_ref.set_pose_target(self.pose_above_box)
+        plan2 = self.move_group_ref.plan()
+        self.goto_plan = plan2[1]
+
+    def update_previouse_pose(self, pose):
+        self.previouse_pose = pose
+        self.calculate_plans()
+
+    def update_pose(self, pose, scale):
+        self.pose = pose
+        self.scale = scale
+
+        new_pose = copy.deepcopy(self.pose)
+        new_pose.position.x = self.pose.position.x + self.scale[0] / 2
+        new_pose.position.y = self.pose.position.y + self.scale[1] / 2
+        new_pose.position.z = self.pose.position.z + self.scale[2] + 0.05
+        self.pose_above_box = new_pose
+
+        self.calculate_plans()
+
+    def update_type(self, type):
+        self.type = type
+
+    def close_gripper(self, close_true):
+        pass
+
+    def calculate_action_plan(self, object_pose):
+        if self.type == "pickup":
+            #Pickup cube
+            self.move_group_ref.set_start_state(self.robot_ref.get_current_state())
+            new_pose = copy.deepcopy(object_pose)
+            new_pose.position.z = self.pose.position.z + 0.2
+            self.move_group_ref.set_pose_target(new_pose)
+            plan2 = self.move_group_ref.plan()
+            self.plans.append(plan2[1])
+
+            self.plans.append((False))
+
+            self.move_group_ref.set_start_state(plan2[1].joint_trajectory.points[-1].positions)
+            new_pose = copy.deepcopy(object_pose)
+            new_pose.position.z = self.pose.position.z + 0.1
+            self.move_group_ref.set_pose_target(new_pose)
+            plan3 = self.move_group_ref.plan()
+            self.plans.append(plan3[1])
+
+            self.plans.append((True))
+
+            self.move_group_ref.set_start_state(plan3[1].joint_trajectory.points[-1].positions)
+            self.move_group_ref.set_pose_target(self.pose_above_box)
+            plan4 = self.move_group_ref.plan()
+            self.plans.append(plan4[1])
+
+        elif self.type == "place":
+            self.plans.append((False))
+
+    def execute(self, target_object):
+        self.move_group_ref.execute(plan_msg=self.goto_plan, wait=True)
+
+        for plan in self.plans:
+            if len(plan) > 1:
+                self.calculate_action_plan(target_object)
+                self.move_group_ref.execute(plan_msg=plan, wait=True)
+            elif len(plan) == 1:
+                self.move_group_ref.stop()
+                self.close_gripper(plan[0])
+
+    def publish_cube(self, vis_pub, id):
+        marker = Marker()
+        marker.header.frame_id = "world"
+        marker.header.stamp = rospy.Time()
+        marker.ns = ""
+        marker.id = id
+        marker.type = 1
+        marker.action = 0
+
+        new_pose = copy.deepcopy(self.pose)
+        new_pose.position.x = self.pose.position.x + self.scale[0] / 2
+        new_pose.position.y = self.pose.position.y + self.scale[1] / 2
+
+        marker.pose = new_pose
+        marker.scale.x = self.scale[0]
+        marker.scale.y = self.scale[1]
+        marker.scale.z = self.scale[2]
+        marker.color.a = 1.0
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        vis_pub.publish( marker )
 
 class RosPlanner:
     def __init__(self) -> None:
@@ -23,8 +134,8 @@ class RosPlanner:
         self.group = moveit_commander.MoveGroupCommander(group_name)
 
         self.boxes = []
-        self.plans = []
         self.vis_paths = []
+        self.pickup_box_pose = None
 
         self.display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',
                                                 moveit_msgs.msg.DisplayTrajectory,
@@ -32,6 +143,8 @@ class RosPlanner:
 
         self.boxes_subscriber = rospy.Subscriber("/boxes", boxes, self.incoming_box)
         self.vis_mode_subscriber = rospy.Subscriber("/vis_num", Int8MultiArray, self.change_mode)
+        self.physical_box = rospy.Subscriber("/physicalbox", PoseStamped, self.incoming_box_pose)
+        self.vis_pub = rospy.Publisher( "visualization_marker", Marker, queue_size=10)
 
     def run(self):
         rospy.spin()
@@ -62,12 +175,22 @@ class RosPlanner:
         #     self.display_trajectory_publisher.publish(display_trajectory)
 
     def incoming_box(self, msg):
-        if (msg.boxid > len(self.boxes)):
-            self.boxes.append((msg.boxid, msg.pose, msg.type))
-        else:
-            self.boxes[msg.boxid] = (msg.boxid, msg.pose, msg.type)
+        if (msg.boxid >= len(self.boxes)):
+            previouse_pose = self.robot.get_current_state() #Joint space
 
-        self.calculate_trajectory(msg.boxid)
+            if msg.boxid != 0:
+                previouse_pose.joint_state.position = self.boxes[msg.boxid - 1].goto_plan.joint_trajectory.points[-1].positions #Joint space
+
+            self.boxes.append(display_object(msg.pose, (msg.scalex, msg.scaley, msg.scalez), msg.type, self.group, self.robot, previouse_pose))
+        else:
+            self.boxes[msg.boxid].update_pose(msg.pose, (msg.scalex, msg.scaley, msg.scalez)) #Cartesian space
+            if len(self.boxes) > msg.boxid + 1:
+                self.boxes[msg.boxid + 1].update_previouse_pose(self.boxes[msg.boxid].goto_plan.points[-1].positions)
+
+        if self.boxes[msg.boxid].type != msg.type:
+            self.boxes[msg.boxid].update_type(msg.type)
+
+        self.update_visualizer()
 
     def change_mode(self, msg):
         if len(msg.data) == 0:
@@ -83,60 +206,23 @@ class RosPlanner:
             #Implement multiple paths, ie 0-1 and 3-4 and such
             pass
 
-    def calculate_trajectory(self, id):
-        if len(self.boxes) == 1:
-            old_robot_state = copy.deepcopy(self.robot.get_current_state())
-
-            self.group.set_start_state(old_robot_state)
-            self.group.set_pose_target(self.boxes[0][1])
-
-            plan2 = self.group.plan()
-            self.plans = [copy.deepcopy(plan2)]
-
-        elif len(self.boxes) > 1:
-            old_robot_state = copy.deepcopy(self.robot.get_current_state())
-
-            self.group.set_start_state(old_robot_state)
-            self.group.set_pose_target(self.boxes[0][1])
-
-            plan2 = self.group.plan()
-            self.plans = []
-
-            for i in range(1, len(self.boxes)):
-                old_robot_state = plan2.joint_trajectory.points[-1].positions
-
-                self.group.set_start_state(old_robot_state)
-                self.group.set_pose_target(self.boxes[i][1])
-
-                plan = self.group.plan()
-                self.plans.append(copy.deepcopy(plan))
-
-            self.group.set_start_state(self.plans[-1].joint_trajectory.points[-1].positions)
-            self.group.set_pose_target(self.boxes[0][1])
-
-            plan2 = self.group.plan()
-            self.plans = [copy.deepcopy(plan2)]
-
-        self.update_visualizer()
-
-
     def update_visualizer(self):
-        if len(self.vis_paths) == 0:
-            display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-            display_trajectory.trajectory_start = self.plans[0].joint_trajectory.points[-1].positions
+        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+        display_trajectory.trajectory_start = self.robot.get_current_state()
 
-            for plan in self.plans:
-                display_trajectory.trajectory.append(plan)
+        for id, box in enumerate(self.boxes):
+            display_trajectory.trajectory.append(box.goto_plan)
+            box.publish_cube(self.vis_pub, id )
 
-            self.display_trajectory_publisher.publish(display_trajectory)
-        else:
-            #Implement fragmented path showing
-            pass
+        self.display_trajectory_publisher.publish(display_trajectory)
 
+
+    def incoming_box_pose(self, msg):
+        self.pickup_box_pose = msg.pose
 
 if __name__ == "__main__":
     moveit_commander.roscpp_initialize(sys.argv)
-    rospy.init_node('move_path_visualizer', anonymous=True)
+    rospy.init_node('move_path_visualizer')
     planner = RosPlanner()
     planner.run()
 
