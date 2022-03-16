@@ -36,3 +36,18 @@ build, source and run in two terminals:
 roslaunch rob8 ur10_bringup.launch
 roslaunch rob8 ur10_controllers.launch
 ```
+
+## Install ros driver for Astra camera
+```
+$ sudo apt install ros-noetic-rgbd-launch ros-noetic-libuvc-camera ros-noetic-libuvc-ros
+
+# go to src folder in work space
+$ git clone https://github.com/orbbec/ros_astra_camera
+
+$ roscd astra_camera
+$ ./scripts/create_udev_rules
+
+# go to root folder
+$ catkin_make
+```
+
