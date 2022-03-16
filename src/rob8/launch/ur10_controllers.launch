@@ -1,9 +1,9 @@
 <launch>
     <!-- moveit, sim is required, otherwise it waits for the real controllers to communicate... -->
-    <include file="$(find ur10_moveit_config)/launch/ur10_moveit_planning_execution.launch" >
+    <include file="$(find rob8_ur10_moveit_config)/launch/ur10_moveit_planning_execution.launch" >
         <arg name="sim" value="true" />
     </include>
-    <include file="$(find ur10_moveit_config)/launch/moveit_rviz.launch" >
+    <include file="$(find rob8_ur10_moveit_config)/launch/moveit_rviz.launch" >
         <arg name="rviz_config" value="$(find rob8)/config/rviz_config.rviz"/>
     </include>
     <!-- small node, which adds the floor to the planning scene -->
