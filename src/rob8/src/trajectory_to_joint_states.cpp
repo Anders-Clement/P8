@@ -3,7 +3,6 @@
 
 void Trajectory_to_joint_states::display_trajectory_callback(const moveit_msgs::DisplayTrajectoryConstPtr& msg)
 {
-    ROS_INFO("display_trajectory_callback");
     current_trajectory.joint_names = msg->trajectory[0].joint_trajectory.joint_names;
     current_trajectory.header = msg->trajectory[0].joint_trajectory.header;
     current_trajectory.points.clear();
@@ -47,7 +46,7 @@ void Trajectory_to_joint_states::spin()
 
         for(int i = 0; i < current_trajectory.points.size(); i++)
         {
-            if(current_trajectory.points[i].time_from_start < display_run_time)
+            if(current_trajectory.points[i].time_from_start.toNSec() /2.0 < display_run_time.toNSec())
                 current_point = &current_trajectory.points[i];
             else
                 break;
@@ -56,7 +55,7 @@ void Trajectory_to_joint_states::spin()
         if(current_point == nullptr || *current_point == current_trajectory.points[current_trajectory.points.size()-1])
         {
             display_start_time = ros::Time::now();
-            ROS_INFO("done, looping around");
+            // ROS_INFO("done, looping around");
             continue;
         }
 
