@@ -12,7 +12,7 @@ import geometry_msgs.msg
 from std_msgs.msg import String, Int8MultiArray
 from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import Marker
-from rob8.msg import boxes, ExecutepathAction, ExecutepathActionFeedback, ExecutepathActionGoal, ExecutepathActionResult
+from rob8.msg import Boxes, ExecutepathAction, ExecutepathActionFeedback, ExecutepathActionGoal, ExecutepathActionResult
 import actionlib
 from moveit_commander.conversions import pose_to_list
 
@@ -158,7 +158,7 @@ class RosPlanner:
                                                 moveit_msgs.msg.DisplayTrajectory,
                                                 queue_size=20)
 
-        self.boxes_subscriber = rospy.Subscriber("/boxes", boxes, self.incoming_box)
+        self.boxes_subscriber = rospy.Subscriber("/boxes", Boxes, self.incoming_box)
         self.vis_mode_subscriber = rospy.Subscriber("/vis_num", Int8MultiArray, self.change_mode)
         self.physical_box = rospy.Subscriber("/physicalbox", PoseStamped, self.incoming_box_pose)
         self.vis_pub = rospy.Publisher( "visualization_marker", Marker, queue_size=10)
