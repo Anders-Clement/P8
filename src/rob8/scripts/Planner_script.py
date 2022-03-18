@@ -2,6 +2,9 @@
 
 import sys
 import copy
+
+import threading
+import time
 import rospy
 import moveit_commander
 import moveit_msgs.msg
@@ -9,7 +12,8 @@ import geometry_msgs.msg
 from std_msgs.msg import String, Int8MultiArray
 from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import Marker
-from rob8.msg import boxes
+from rob8.msg import boxes, ExecutepathAction, ExecutepathActionFeedback, ExecutepathActionGoal, ExecutepathActionResult
+import actionlib
 from moveit_commander.conversions import pose_to_list
 
 class display_object:
@@ -39,6 +43,7 @@ class display_object:
         self.move_group_ref.set_pose_target(self.pose_above_box)
         plan2 = self.move_group_ref.plan()
         self.goto_plan = plan2[1]
+        #print(self.goto_plan)
 
     def update_previouse_pose(self, pose):
         self.previouse_pose = pose
@@ -99,8 +104,14 @@ class display_object:
                 self.calculate_action_plan(target_object)
                 self.move_group_ref.execute(plan_msg=plan, wait=True)
             elif len(plan) == 1:
-                self.move_group_ref.stop()
+                #self.move_group_ref.stop()
                 self.close_gripper(plan[0])
+
+    def last_box(self, first_box):
+        self.move_group_ref.set_start_state(self.plans[-1].joint_trajectory.points[-1].positions)
+        self.move_group_ref.set_pose_target(first_box.pose_above_box)
+        plan3 = self.move_group_ref.plan()
+        self.plans.append(plan3[1])
 
     def publish_cube(self, vis_pub, id):
         marker = Marker()
@@ -127,15 +138,21 @@ class display_object:
 
 class RosPlanner:
     def __init__(self) -> None:
+        #Moveit commander interfaces
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
-
         group_name = "manipulator"
         self.group = moveit_commander.MoveGroupCommander(group_name)
-
+        #Variables for keeping track of boxes
         self.boxes = []
         self.vis_paths = []
         self.pickup_box_pose = None
+        #Action server variables
+        self.executing_boxid = 0
+        self.executing_finished = False
+        self.executing_thread = None
+        self.feedback_msg = ExecutepathActionFeedback()
+        self.result_msg = ExecutepathActionResult()
 
         self.display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',
                                                 moveit_msgs.msg.DisplayTrajectory,
@@ -146,38 +163,51 @@ class RosPlanner:
         self.physical_box = rospy.Subscriber("/physicalbox", PoseStamped, self.incoming_box_pose)
         self.vis_pub = rospy.Publisher( "visualization_marker", Marker, queue_size=10)
 
+        self.action_server = actionlib.SimpleActionServer("planner_executer", ExecutepathAction, execute_cb=self.execute_cb, auto_start = False)
+        self.action_server.start()
+
+    def execute_cb(self, goal):
+        print(goal)
+        if goal.runpath == True:
+            if self.executing_thread is None:
+                self.executing_thread = threading.Thread(target=self.execute_plan)
+                self.executing_thread.start()
+                print("Creating moveit commander Thread")
+
+            if self.executing_finished == True:
+                self.executing_thread = None
+                self.result_msg.result.succededTrue = True
+                self.action_server.set_succeeded(self.result_msg.result)
+                #print("Succeded")
+            else:
+                self.feedback_msg.feedback.currentPath = self.executing_boxid
+                self.action_server.publish_feedback(self.feedback_msg.feedback)
+                #print("Feedbacking")
+        else:
+            print("Havent implemented replanning yet")
+
+    def execute_plan(self):
+        time.sleep(10)
+        self.executing_finished = False
+        object_counter = 0
+        while not rospy.is_shutdown():
+            if object_counter >= len(self.boxes):
+                #print(len(self.boxes))
+                #print("Breaking on {}".format(object_counter))
+                break
+            self.executing_boxid = object_counter
+            self.boxes[object_counter].execute(None)
+            object_counter += 1
+
+        self.executing_finished = True
+        self.executing_thread = None
+            
     def run(self):
         rospy.spin()
-        
-        # while not rospy.is_shutdown():
-        #     old_robot_state = copy.deepcopy(self.robot.get_current_state())
-
-        #     plan = self.group.plan()
-
-        #     new_state = copy.deepcopy(old_robot_state)
-        #     print(type(new_state.joint_state.position))
-        #     new_state.joint_state.position = (0, 0, 0, 0, 0, 0)
-
-        #     self.group.set_start_state(new_state)
-        #     self.group.set_joint_value_target(old_robot_state.joint_state.position)
-        #     plan2 = self.group.plan()
-
-        #     print(plan)
-        #     print("============= HERE =============")
-        #     print(plan2)
-        #     print("============= HERE2 =============")
-
-        #     display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-        #     display_trajectory.trajectory_start = self.robot.get_current_state()
-        #     display_trajectory.trajectory.append(plan)
-        #     display_trajectory.trajectory.append(plan2)
-        #     # Publish
-        #     self.display_trajectory_publisher.publish(display_trajectory)
 
     def incoming_box(self, msg):
+        previouse_pose = self.robot.get_current_state() #Joint space
         if (msg.boxid >= len(self.boxes)):
-            previouse_pose = self.robot.get_current_state() #Joint space
-
             if msg.boxid != 0:
                 previouse_pose.joint_state.position = self.boxes[msg.boxid - 1].goto_plan.joint_trajectory.points[-1].positions #Joint space
 
@@ -185,11 +215,15 @@ class RosPlanner:
         else:
             self.boxes[msg.boxid].update_pose(msg.pose, (msg.scalex, msg.scaley, msg.scalez)) #Cartesian space
             if len(self.boxes) > msg.boxid + 1:
-                self.boxes[msg.boxid + 1].update_previouse_pose(self.boxes[msg.boxid].goto_plan.points[-1].positions)
+                previouse_pose.joint_state.position = self.boxes[msg.boxid].goto_plan.joint_trajectory.points[-1].positions
+                self.boxes[msg.boxid + 1].update_previouse_pose(previouse_pose)
 
         if self.boxes[msg.boxid].type != msg.type:
             self.boxes[msg.boxid].update_type(msg.type)
 
+        self.boxes[-1].last_box(self.boxes[0].plans[0].joint_trajectory.points[0].positions)
+
+        print("Tracking boxes: {}".format(len(self.boxes)))
         self.update_visualizer()
 
     def change_mode(self, msg):
