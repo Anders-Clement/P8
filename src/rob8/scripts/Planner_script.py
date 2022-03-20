@@ -43,7 +43,6 @@ class display_object:
         self.move_group_ref.set_pose_target(self.pose_above_box)
         plan2 = self.move_group_ref.plan()
         self.goto_plan = plan2[1]
-        #print(self.goto_plan)
 
     def update_previouse_pose(self, pose):
         self.previouse_pose = pose
@@ -100,16 +99,20 @@ class display_object:
         self.move_group_ref.execute(plan_msg=self.goto_plan, wait=True)
 
         for plan in self.plans:
-            if len(plan) > 1:
+            if type(plan) != bool:
                 self.calculate_action_plan(target_object)
                 self.move_group_ref.execute(plan_msg=plan, wait=True)
-            elif len(plan) == 1:
+            else:
                 #self.move_group_ref.stop()
                 self.close_gripper(plan[0])
 
     def last_box(self, first_box):
-        self.move_group_ref.set_start_state(self.plans[-1].joint_trajectory.points[-1].positions)
-        self.move_group_ref.set_pose_target(first_box.pose_above_box)
+        previouse_pose = self.robot_ref.get_current_state() #Joint space
+        previouse_pose.joint_state.position = self.goto_plan.joint_trajectory.points[-1].positions
+
+        self.move_group_ref.set_start_state(previouse_pose)
+        self.move_group_ref.set_joint_value_target(first_box)
+        
         plan3 = self.move_group_ref.plan()
         self.plans.append(plan3[1])
 
@@ -160,7 +163,7 @@ class RosPlanner:
 
         self.boxes_subscriber = rospy.Subscriber("/boxes", Boxes, self.incoming_box)
         self.vis_mode_subscriber = rospy.Subscriber("/vis_num", Int8MultiArray, self.change_mode)
-        self.physical_box = rospy.Subscriber("/physicalbox", PoseStamped, self.incoming_box_pose)
+        self.physical_box = rospy.Subscriber("/physicalbox", PoseStamped, self.incoming_box_pose, queue_size=1)
         self.vis_pub = rospy.Publisher( "visualization_marker", Marker, queue_size=10)
 
         self.action_server = actionlib.SimpleActionServer("planner_executer", ExecutepathAction, execute_cb=self.execute_cb, auto_start = False)
@@ -221,7 +224,7 @@ class RosPlanner:
         if self.boxes[msg.boxid].type != msg.type:
             self.boxes[msg.boxid].update_type(msg.type)
 
-        self.boxes[-1].last_box(self.boxes[0].plans[0].joint_trajectory.points[0].positions)
+        self.boxes[-1].last_box(self.boxes[0].goto_plan.joint_trajectory.points[0].positions)
 
         print("Tracking boxes: {}".format(len(self.boxes)))
         self.update_visualizer()
