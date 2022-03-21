@@ -25,7 +25,7 @@ void Trajectory_to_joint_states::display_trajectory_callback(const moveit_msgs::
 Trajectory_to_joint_states::Trajectory_to_joint_states(ros::NodeHandle* nh)
 {
     display_trajectory_sub = nh->subscribe<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, &Trajectory_to_joint_states::display_trajectory_callback, this);
-    joint_state_pub = nh->advertise<sensor_msgs::JointState>("/joint_states_visualizer", 5, true);
+    joint_state_pub = nh->advertise<sensor_msgs::JointState>(VIS_TOPIC, 5, true);
 }
 
 void Trajectory_to_joint_states::spin()
@@ -46,7 +46,7 @@ void Trajectory_to_joint_states::spin()
 
         for(int i = 0; i < current_trajectory.points.size(); i++)
         {
-            if(current_trajectory.points[i].time_from_start.toNSec() /2.0 < display_run_time.toNSec())
+            if(current_trajectory.points[i].time_from_start.toNSec() * SPEED_FACTOR < display_run_time.toNSec())
                 current_point = &current_trajectory.points[i];
             else
                 break;

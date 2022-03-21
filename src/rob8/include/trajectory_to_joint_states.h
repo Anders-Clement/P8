@@ -4,6 +4,9 @@
 #include "sensor_msgs/JointState.h"
 #include "moveit_msgs/DisplayTrajectory.h"
 
+#define VIS_TOPIC "joint_states_visualizer"
+#define SPEED_FACTOR .5
+
 class Trajectory_to_joint_states
 {
     ros::Subscriber display_trajectory_sub;
