@@ -11,10 +11,10 @@
 
     <!-- rosbridge_server to connect with unity -->
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
-        <arg name="address" value="ubuntu.local"/>
+        <arg name="address" value="hanslaptop.local"/>
     </include> 
 
     <!-- node which publishes planned trajectories to unity -->
-    <node pgk="rob8" type="trajectory_to_joint_states" name="trajectory_to_joint_states" />
+    <node pkg="rob8" type="trajectory_to_joint_states" name="trajectory_to_joint_states" />
 </launch>    
     

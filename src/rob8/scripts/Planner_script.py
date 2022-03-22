@@ -233,6 +233,7 @@ class RosPlanner:
                 previouse_pose.joint_state.position = self.boxes[msg.boxid - 1].goto_plan.joint_trajectory.points[-1].positions #Joint space
             
             self.boxes.append(display_object(msg.pose, (msg.scalex, msg.scaley, msg.scalez), msg.type.data, self.group, self.robot, previouse_pose))
+            print("Created box {}".format(msg.boxid))
         elif (msg.boxid > len(self.boxes)):
             print("Oliver fucked the order up")
             #Implement message buffer for out of order boxes, ie oliver fucked up the order
