@@ -14,6 +14,8 @@
         <arg name="address" value="hanslaptop.local"/>
     </include> 
 
+    <node pkg="rob8" type="Planner_script.py" name="trajectory_planner" />
+
     <!-- node which publishes planned trajectories to unity -->
     <node pkg="rob8" type="trajectory_to_joint_states" name="trajectory_to_joint_states" />
 </launch>    

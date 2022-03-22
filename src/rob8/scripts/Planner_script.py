@@ -30,9 +30,9 @@ class display_object:
         self.last_box_plan = None
 
         new_pose = copy.deepcopy(self.pose)
-        new_pose.position.x = self.pose.position.x + self.scale[0] / 2
-        new_pose.position.y = self.pose.position.y + self.scale[1] / 2
-        new_pose.position.z = self.pose.position.z + self.scale[2] + 0.05
+        new_pose.position.x = self.pose.position.x #+ self.scale[0] / 2
+        new_pose.position.y = self.pose.position.y #+ self.scale[1] / 2
+        new_pose.position.z = self.pose.position.z + self.scale[2] / 2
         new_pose.orientation.x = 1
         new_pose.orientation.y = 0
         new_pose.orientation.z = 0
@@ -63,9 +63,9 @@ class display_object:
         self.scale = scale
 
         new_pose = copy.deepcopy(self.pose)
-        new_pose.position.x = self.pose.position.x + self.scale[0] / 2
-        new_pose.position.y = self.pose.position.y + self.scale[1] / 2
-        new_pose.position.z = self.pose.position.z + self.scale[2] + 0.05
+        new_pose.position.x = self.pose.position.x #+ self.scale[0] / 2
+        new_pose.position.y = self.pose.position.y #+ self.scale[1] / 2
+        new_pose.position.z = self.pose.position.z + self.scale[2] / 2
         new_pose.orientation.x = 1
         new_pose.orientation.y = 0
         new_pose.orientation.z = 0
@@ -132,8 +132,8 @@ class display_object:
         marker.action = 0
 
         new_pose = copy.deepcopy(self.pose)
-        new_pose.position.x = self.pose.position.x + self.scale[0] / 2
-        new_pose.position.y = self.pose.position.y + self.scale[1] / 2
+        #new_pose.position.x = self.pose.position.x + self.scale[0] / 2
+        #new_pose.position.y = self.pose.position.y + self.scale[1] / 2
 
         marker.pose = new_pose
         marker.scale.x = self.scale[0]
@@ -167,7 +167,7 @@ class RosPlanner:
                                                 moveit_msgs.msg.DisplayTrajectory,
                                                 queue_size=20)
 
-        self.boxes_subscriber = rospy.Subscriber("/boxes", Boxes, self.incoming_box)
+        self.boxes_subscriber = rospy.Subscriber("/boxes", Boxes, self.incoming_box, queue_size=10)
         self.vis_mode_subscriber = rospy.Subscriber("/vis_num", Int8MultiArray, self.change_mode)
         self.physical_box = rospy.Subscriber("/physicalbox", PoseStamped, self.incoming_box_pose, queue_size=1)
         self.vis_pub = rospy.Publisher( "visualization_marker", Marker, queue_size=10)
@@ -215,7 +215,7 @@ class RosPlanner:
 
             #=========== Testing Target =====
             target = self.boxes[object_counter].pose_above_box
-            target.position.z = 0.0
+            target.position.z -= 0.2
             print("Using made up target")
 
             self.boxes[object_counter].execute(target)
@@ -249,6 +249,7 @@ class RosPlanner:
 
         if len(self.boxes) > 1:
             self.boxes[-2].last_box_plan = None
+
         self.boxes[-1].last_box(self.boxes[0].goto_plan.joint_trajectory.points[0].positions)
 
         print("Tracking boxes: {}".format(len(self.boxes)))
