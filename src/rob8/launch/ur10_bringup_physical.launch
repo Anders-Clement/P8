@@ -1,0 +1,7 @@
+<launch>
+    <include file="$(find ur_robot_driver)/launch/ur10_bringup.launch">
+        <arg name="robot_ip" value="192.168.12.112"/>
+        <arg name="kinematics_config" value="$(find rob8)/config/UR10_cali.yaml" />
+        <arg name="robot_description_file" value="$(find rob8)/launch/inc/load_ur10_hand.launch.xml" />
+    </include>
+</launch>

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+  <!--Parameter files -->
+  <arg name="joint_limit_params" default="$(find ur_description)/config/ur10/joint_limits.yaml"/>
+  <arg name="kinematics_params" default="$(find rob8)/config/UR10_cali.yaml"/>
+  <arg name="physical_params" default="$(find ur_description)/config/ur10/physical_parameters.yaml"/>
+  <arg name="visual_params" default="$(find ur_description)/config/ur10/visual_parameters.yaml"/>
+
+  <!--Common parameters -->
+  <arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface" doc="The hardware_interface to expose for each joint in the simulated robot (one of: [PositionJointInterface, VelocityJointInterface, EffortJointInterface])"/>
+  <arg name="safety_limits" default="false" doc="If True, enable the safety limits controller"/>
+  <arg name="safety_pos_margin" default="0.15" doc="The lower/upper limits in the safety controller" />
+  <arg name="safety_k_position" default="20" doc="Used to set k position in the safety controller" />
+
+  <!-- Use common launch file and pass all arguments to it -->
+  <include file="$(dirname)/load_ur_hand.launch.xml" pass_all_args="true"/>
+</launch>
+
+  <!-- joint_limit_params:=$(find ur_description)/config/ur10/joint_limits.yaml
+  kinematics_params:=$(find rob8)/config/UR10_cali.yaml
+  physical_params:=$(find ur_description)/config/ur10/physical_parameters.yaml
+  visual_params:=$(find ur_description)/config/ur10/visual_parameters.yaml
+  transmission_hw_interface:=hardware_interface/PositionJointInterface
+  safety_limits:=false
+  safety_pos_margin:=0.15
+  safety_k_position:=20 -->
+
+<!-- 
+  joint_limit_params:=$(rospack find ur_description)/config/ur10/joint_limits.yaml kinematics_params:=$(rospack find rob8)/config/UR10_cali.yaml physical_params:=$(rospack find ur_description)/config/ur10/physical_parameters.yaml visual_params:=$(rospack find ur_description)/config/ur10/visual_parameters.yaml transmission_hw_interface:=hardware_interface/PositionJointInterface safety_limits:=false safety_pos_margin:=0.15 safety_k_position:=20
+-->
