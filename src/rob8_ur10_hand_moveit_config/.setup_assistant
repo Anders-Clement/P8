@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: rob8
+    relative_path: urdf/ur10_hand.xacro
+    xacro_args: joint_limit_params:=$(rospack find ur_description)/config/ur10/joint_limits.yaml kinematics_params:=$(rospack find rob8)/config/UR10_cali.yaml physical_params:=$(rospack find ur_description)/config/ur10/physical_parameters.yaml visual_params:=$(rospack find ur_description)/config/ur10/visual_parameters.yaml transmission_hw_interface:=hardware_interface/PositionJointInterface safety_limits:=false safety_pos_margin:=0.15 safety_k_position:=20
+  SRDF:
+    relative_path: config/ur10_robot.srdf
+  CONFIG:
+    author_name: Anders Clement
+    author_email: acleme18@student.aau.dk
+    generated_timestamp: 1648200598
