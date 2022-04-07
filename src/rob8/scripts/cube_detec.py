@@ -236,10 +236,13 @@ if __name__ == '__main__':
 			image_blur = cv2.GaussianBlur(cube.image_queue[0],(7,7), 0)
 			hsv = cv2.cvtColor(image_blur, cv2.COLOR_BGR2HSV)
 
+			# lower bound and upper bound for brown color
+			lower_bound = np.array([10, 100, 100])
+			upper_bound = np.array([30, 255, 255])
 
 			# lower bound and upper bound for blue color
-			lower_bound = np.array([90, 100, 100])
-			upper_bound = np.array([140, 255, 255])
+			# lower_bound = np.array([90, 100, 100])
+			# upper_bound = np.array([140, 255, 255])
 
 			# lower bound and upper bound for skin color
 			# lower_bound = np.array([0, 120, 120])
