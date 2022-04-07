@@ -46,6 +46,7 @@ add_message_files(
   FILES
   Boxes.msg
   Num.msg
+  BoxResponse.msg
 #   Message2.msg
 )
 
