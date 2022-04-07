@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.0.2)
 project(rob8)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs moveit_msgs genmsg actionlib_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs moveit_msgs genmsg actionlib_msgs message_generation pcl_conversions pcl_ros)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -116,6 +116,7 @@ catkin_package(
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -203,5 +204,10 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
+link_directories(${PCL_LIBRARY_DIRS})
+
 add_executable(trajectory_to_joint_states src/trajectory_to_joint_states.cpp)
 target_link_libraries(trajectory_to_joint_states ${catkin_LIBRARIES})
+
+add_executable(pclransacpub src/pcl-ransac.cpp)
+target_link_libraries(pclransacpub ${catkin_LIBRARIES})
