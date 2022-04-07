@@ -29,7 +29,7 @@ class cube_detec():
 		self.image_recieved = False
 		self.camera_info_msg = [None, None]
 
-		rospy.init_node('cube_detec_node', anonymous=True)
+		rospy.init_node('cube_detec_node', anonymous=False)
 
 		self.colour_sub = message_filters.Subscriber("/camera/rgb/image_raw", Image)
 		self.depth_sub = message_filters.Subscriber('/camera/depth_registered/image_raw', Image)
@@ -155,17 +155,17 @@ class cube_detec():
 
 
 
-	def deproject_points(self,points):
-		K = np.asarray(self.camera_info_msg[1].K).reshape(3,3)
-		u = points[:,0]
-		v = points[:,1]
-		z = points[:,2]
-		x_over_z = (u - K[0, 2]) / K[0, 0]
-		y_over_z = (v - K[1, 2]) / K[1, 1]
-		x = x_over_z * z
-		y = y_over_z * z
+	# def deproject_points(self,points):
+	# 	K = np.asarray(self.camera_info_msg[1].K).reshape(3,3)
+	# 	u = points[:,0]
+	# 	v = points[:,1]
+	# 	z = points[:,2]
+	# 	x_over_z = (u - K[0, 2]) / K[0, 0]
+	# 	y_over_z = (v - K[1, 2]) / K[1, 1]
+	# 	x = x_over_z * z
+	# 	y = y_over_z * z
 
-		return np.array([x,y,z])
+	# 	return np.array([x,y,z])
 
 
 

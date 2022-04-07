@@ -20,6 +20,8 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
 #include <pcl_ros/transforms.h>
+#include "geometry_msgs/PoseStamped.h"
+#include "visualization_msgs/Marker.h"
 
 typedef pcl::PointXYZRGB PointT;
 
@@ -28,8 +30,19 @@ typedef pcl::PointXYZRGB PointT;
 // #define MAX_Z_DISTANCE 0.75
 
 ros::Publisher pub;
+ros::Publisher vis_pub;
 
-std::tuple<float, float> calcRadius(pcl::PointCloud<PointT>::Ptr cloud)
+// projection of vector v1 onto v2
+Eigen::Vector3f projection( Eigen::Vector3f v1, Eigen::Vector3f v2 )
+{
+  float v2_ls = v2.squaredNorm();
+  float dotpro = v2.dot(v1);
+  return v2 * (dotpro/v2_ls);
+
+}
+
+
+std::tuple<Eigen::Vector3f, Eigen::Vector3f> calcRadius(pcl::PointCloud<PointT>::Ptr cloud)
 {
   pcl::NormalEstimationOMP<PointT, pcl::Normal> ne;
   pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg;
@@ -50,9 +63,9 @@ std::tuple<float, float> calcRadius(pcl::PointCloud<PointT>::Ptr cloud)
   seg.setMethodType(pcl::SAC_RANSAC);
   seg.setOptimizeCoefficients(true);
   seg.setNormalDistanceWeight(0.1);
-  seg.setMaxIterations(100);
+  seg.setMaxIterations(10000);
   seg.setDistanceThreshold(0.05);
-  seg.setRadiusLimits(0.05, 0.3);
+  //seg.setRadiusLimits(0.05, 0.3);
   seg.setInputCloud(cloud);
   seg.setInputNormals(cloud_normals);
 
@@ -70,10 +83,10 @@ std::tuple<float, float> calcRadius(pcl::PointCloud<PointT>::Ptr cloud)
   seg.segment(*inliers_cylinder, *coefficients_cylinder);
 
 // #if VISUALIZE==1
-// 	extract.setInputCloud(cloud);
-// 	extract.setIndices(inliers_cylinder);
-// 	extract.setNegative(false);
-// 	extract.filter(*cropped_cloud);
+	extract.setInputCloud(cloud);
+	extract.setIndices(inliers_cylinder);
+	extract.setNegative(false);
+	extract.filter(*cropped_cloud);
 
 // 	for (int i = 0; i < cropped_cloud->size(); i++)
 // 		cropped_cloud->at(i).g = 255;
@@ -101,57 +114,87 @@ std::tuple<float, float> calcRadius(pcl::PointCloud<PointT>::Ptr cloud)
 // 	}
 // #endif
 
-	float mse = 0;
-	for(auto point: cloud.get()->points)
+  Eigen::Vector3f com;
+
+  int n = 0;
+
+	for(auto point: cropped_cloud.get()->points)
 	{
-		Eigen::Vector3f pi;
-		pi[0] = point.x;
-		pi[1] = point.y;
-		pi[2] = point.z;
-		Eigen::Vector3f pstar;
-		pstar[0] = coefficients_cylinder->values[0];
-		pstar[1] = coefficients_cylinder->values[1];
-		pstar[2] = coefficients_cylinder->values[2];
-		Eigen::Vector3f a;
-		a[0] = coefficients_cylinder->values[3];
-		a[1] = coefficients_cylinder->values[4];
-		a[2] = coefficients_cylinder->values[5];
+    com[0] += point.x;
+    com[1] += point.y;
+    com[2] += point.z;
+    n += 1;
 
-		Eigen::Vector3f pi_m_pstar = pi-pstar;
-		float pi_m_pstar_dot_a = pi_m_pstar.dot(a);
-		Eigen::Vector3f pi_m_pstar_dot_a_mult_a = pi_m_pstar_dot_a * a;
-		Eigen::Vector3f vec = pi_m_pstar - pi_m_pstar_dot_a_mult_a;
-		float norm = vec.norm();
-		float deltaDist = norm - coefficients_cylinder->values[6];
-		mse += deltaDist*deltaDist;
+		// Eigen::Vector3f pi;
+		// pi[0] = point.x;
+		// pi[1] = point.y;
+		// pi[2] = point.z;
+		// Eigen::Vector3f pstar;
+		// pstar[0] = coefficients_cylinder->values[0];
+		// pstar[1] = coefficients_cylinder->values[1];
+		// pstar[2] = coefficients_cylinder->values[2];
+		// Eigen::Vector3f a;
+		// a[0] = coefficients_cylinder->values[3];
+		// a[1] = coefficients_cylinder->values[4];
+		// a[2] = coefficients_cylinder->values[5];
+
+		// Eigen::Vector3f pi_m_pstar = pi-pstar;
+		// float pi_m_pstar_dot_a = pi_m_pstar.dot(a);
+		// Eigen::Vector3f pi_m_pstar_dot_a_mult_a = pi_m_pstar_dot_a * a;
+		// Eigen::Vector3f vec = pi_m_pstar - pi_m_pstar_dot_a_mult_a;
+		// float norm = vec.norm();
+		// float deltaDist = norm - coefficients_cylinder->values[6];
+		// mse += deltaDist*deltaDist;
 	}
-	mse /= (float)cloud->size();
+	// mse /= (float)cloud->size();
+  com /= n;
 
-	return std::tuple<float,float> (abs(coefficients_cylinder->values[6]), mse);
+  Eigen::Vector3f pstar;
+  pstar[0] = coefficients_cylinder->values[0];
+  pstar[1] = coefficients_cylinder->values[1];
+  pstar[2] = coefficients_cylinder->values[2];
+  Eigen::Vector3f a;
+  a[0] = coefficients_cylinder->values[3];
+  a[1] = coefficients_cylinder->values[4];
+  a[2] = coefficients_cylinder->values[5];
+  
+  
+  Eigen::Vector3f proj_com = projection(com-pstar,a);
+
+  return std::tuple<Eigen::Vector3f,Eigen::Vector3f>(proj_com+pstar,a);
+
+	// return std::tuple<float,float> (abs(coefficients_cylinder->values[6]), [average_x,average_y,average_y]);
 }
 
-// inline void PointCloudXYZRGBAtoXYZRGB(pcl::PointCloud<pcl::PointXYZRGBA> &in, pcl::PointCloud<pcl::PointXYZRGB> &out)
-// {
-//   out.width = in.width;
-//   out.height = in.height;
-//   out.points.resize(in.points.size());
-//   for (size_t i = 0; i < in.points.size(); i++)
-//   {
-//     out.points[i].x = in.points[i].x;
-//     out.points[i].y = in.points[i].y;
-//     out.points[i].z = in.points[i].z;
-//     out.points[i].r = in.points[i].r;
-//     out.points[i].g = in.points[i].g;
-//     out.points[i].b = in.points[i].b;
-//   }
-// }
+
+void vis_marker(geometry_msgs::PoseStamped pose)
+{
+  visualization_msgs::Marker marker;
+  marker.header = pose.header;
+  marker.pose = pose.pose;
+  marker.scale.x = 0.1;
+  marker.scale.y = 0.05;
+  marker.scale.z = 0.05;
+  marker.action = 0;
+  marker.color.r = 1;
+  marker.color.g = 1;
+  marker.color.b = 0;
+  marker.color.a = 1;
+  marker.lifetime = ros::Duration(10);
+  marker.type = 0;
+
+  vis_pub.publish(marker);
+
+}
+
+
 
 void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
 {
   // Container for original & filtered data
   pcl::PCLPointCloud2 cloud2;
   // pcl::PCLPointCloud2ConstPtr cloudPtr(cloud2);
-  //pcl::PCLPointCloud2 cloud_filtered;
+  // pcl::PCLPointCloud2 cloud_filtered;
 
   // Convert to PCL data type
   pcl_conversions::toPCL(*cloud_msg, cloud2);
@@ -163,7 +206,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   // pcl::PointCloud<pcl::PointXYZRGB> cloud;
   // pcl::copyPointCloud(cloudxyz,cloud);
 
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 
 //   for（int nIndex = 0； nIndex < cloudxyz->points.size (); nIndex++）
 // {
@@ -174,40 +217,73 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   
   for(auto point : cloudxyz->points)
   {
-    std::cout << point << std::endl;
     pcl::PointXYZRGB rgbPoint;
     rgbPoint.x = point.x;
     rgbPoint.y = point.y;
     rgbPoint.z = point.z;
+    if (rgbPoint.x != rgbPoint.x || rgbPoint.y != rgbPoint.y || rgbPoint.z != rgbPoint.z)
+    {
+      continue;
+    }
+
     cloud->push_back(rgbPoint);
+
   }
 
+  if (cloud->size() < 10)
+  {
+    return;
+  }
 
   // // Perform the actual filtering
   // pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
-  // sor.setInputCloud (cloudPtr);
+  // sor.setInputCloud (*cloud);
   // sor.setLeafSize (0.1, 0.1, 0.1);
   // sor.filter (cloud_filtered);
 
-  // ROS_INFO_STREAM("pre Hello ");
 
-  // pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-  // pcl::PointCloud<pcl::PointXYZRGBA> temp_cloud;
-  // pcl::fromPCLPointCloud2(*cloud2, temp_cloud);
-  // PointCloudXYZRGBAtoXYZRGB(*temp_cloud, *cloud);
-  // // pcl::PointCloud<PointT>::Ptr cloud3(cloud2);
 
-  // ROS_DEBUG("check2 %s", "World");
+  std::tuple<Eigen::Vector3f,Eigen::Vector3f>cyl_vecs;
 
-  calcRadius(cloud);
+  try
+  {
+      // code that could cause exception
+      cyl_vecs = calcRadius(cloud);
+  }
+  catch (const std::exception &exc)
+  {
+      // catch anything thrown within try block that derives from std::exception
+      std::cerr << exc.what();
+  }
 
-  // ROS_INFO_STREAM("post Hello ");
+  if (isinf(std::get<0>(cyl_vecs)[0])) {
+    return;
+  }
+
+  
+  geometry_msgs::PoseStamped pose_msg;
+  pose_msg.header = cloud_msg->header;
+  pose_msg.pose.position.x = std::get<0>(cyl_vecs)[0];
+  pose_msg.pose.position.y = std::get<0>(cyl_vecs)[1];
+  pose_msg.pose.position.z = std::get<0>(cyl_vecs)[2];
+  pose_msg.pose.orientation.x = std::get<1>(cyl_vecs)[0];
+  pose_msg.pose.orientation.y = std::get<1>(cyl_vecs)[1];
+  pose_msg.pose.orientation.z = std::get<1>(cyl_vecs)[2];
+  pose_msg.pose.orientation.w = 0;
+
+
+
+  pub.publish(pose_msg);
+
+
+  vis_marker(pose_msg);
+
   // // Convert to ROS data type
   // sensor_msgs::PointCloud2 output;
   // pcl_conversions::moveFromPCL(cloud_filtered, output);
 
   // // Publish the data
-  // pub.publish(output);
+  // 
   // ROS_INFO_STREAM("post pub ");
 
 }
@@ -222,7 +298,8 @@ int main(int argc, char **argv)
   ros::Subscriber sub = nh.subscribe<sensor_msgs::PointCloud2>("/camera/depth_registered/points", 1, cloud_cb);
 
   // Create a ROS publisher for the output point cloud
-  pub = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
+  pub = nh.advertise<geometry_msgs::PoseStamped>("detection", 1);
+  vis_pub = nh.advertise<visualization_msgs::Marker>("vis_marker",1);
 
   // Spin
   ros::spin();
