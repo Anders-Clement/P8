@@ -49,5 +49,8 @@ $ ./scripts/create_udev_rules
 
 # go to root folder
 $ catkin_make
+
+# use camera:
+$ roslaunch astra_camera astra.launch
 ```
 
