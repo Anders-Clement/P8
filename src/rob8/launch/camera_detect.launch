@@ -2,5 +2,5 @@
     <include file="$(find astra_camera)/launch/astra.launch" />
     <node pkg="rob8" type="cube_detec.py" name="cube_detec_node"/>
 
-    <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster" args="0.85674 -0.2526 0.7 0 0 0 1 base_link camera_link 100" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster" args="0.74 -0.30 0.37 1.92 0.53 0 base_link camera_link" />
 </launch>

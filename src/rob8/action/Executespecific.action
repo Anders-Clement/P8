@@ -1,0 +1,8 @@
+# Define the goal
+string action_string  #Define if we should execute or recalculate
+---
+# Define the result
+bool succededTrue #Returns true if robot finished the paths
+---
+# Define a feedback message
+uint32 currentPath #Which path we're currently on

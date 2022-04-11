@@ -18,7 +18,7 @@ if __name__ == '__main__':
     box_pose = geometry_msgs.msg.PoseStamped()
     box_pose.header.frame_id = "world"
     box_pose.pose.orientation.w = 1.0
-    box_pose.pose.position.z = -0.0002
+    box_pose.pose.position.z = -0.01
     box_name = "floor"
     scene.add_box(box_name, box_pose, size=(100, 100, 0.0001))
     rospy.sleep(2)

@@ -48,6 +48,25 @@
     <parent link="tool0" />
     <child link="onrobot_rg6_base_link" />
   </joint>
+  <link name="sphere">
+    <visual>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+      <origin xyz="0 0 0.05"/> 
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+      <origin xyz="0 0 0.05"/> 
+    </collision>
+  </link>
+
+  <joint name="tool0sphere" type="fixed">
+    <parent link="tool0"/>
+    <child link="sphere"/>
+  </joint>
   <!-- <arg name="gazebo" default="true"/>
   <plugin name="ros_control" filename="libgazebo_ros_control.so">
     <robotNamespace>/robot</robotNamespace>

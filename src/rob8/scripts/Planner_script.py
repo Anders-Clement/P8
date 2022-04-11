@@ -1,10 +1,13 @@
 #! /bin/python3
 
 import enum
+from logging import exception
 import sys
 import copy
 import threading
 import time
+
+from sqlalchemy import false
 import rospy
 import moveit_commander
 import moveit_msgs.msg
@@ -13,9 +16,16 @@ from std_msgs.msg import String, Int8MultiArray
 from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import Marker
 from rob8.msg import Boxes, ExecutepathAction, ExecutepathActionFeedback, ExecutepathActionGoal, ExecutepathActionResult, BoxResponse
+from rob8.msg import ExecutespecificAction, ExecutespecificActionGoal, ExecutespecificFeedback, ExecutespecificResult
 import actionlib
 from moveit_commander.conversions import pose_to_list
 from threading import Thread
+import moveit_msgs.msg
+from std_msgs.msg import Float64
+from ur_msgs.srv import SetIO, SetIORequest, SetIOResponse
+
+import tf2_ros
+import tf2_geometry_msgs
 
 class display_object:
     def __init__(self, pose, scale, type_s, move_group, robot, previouse_pose) -> None:
@@ -34,7 +44,7 @@ class display_object:
         new_pose = copy.deepcopy(self.pose)
         new_pose.position.x = self.pose.position.x #+ self.scale[0] / 2
         new_pose.position.y = self.pose.position.y #+ self.scale[1] / 2
-        new_pose.position.z = self.pose.position.z + self.scale[2] / 2
+        new_pose.position.z = self.pose.position.z + self.scale[2] / 2 + 0.5
         new_pose.orientation.x = 1
         new_pose.orientation.y = 0
         new_pose.orientation.z = 0
@@ -48,10 +58,12 @@ class display_object:
         self.move_group_ref.set_pose_target(self.pose_above_box)
 
         print("Velocity scaling set to 1")
-        self.move_group_ref.set_max_acceleration_scaling_factor(1)
-        self.move_group_ref.set_max_velocity_scaling_factor(1)
+        self.move_group_ref.set_max_acceleration_scaling_factor(0.1)
+        self.move_group_ref.set_max_velocity_scaling_factor(0.1)
 
+        #start_time = time.time()
         plan2 = self.move_group_ref.plan()
+        #print(time.time() - start_time)
 
         self.goto_plan = None
         if (plan2[0] == True):
@@ -79,74 +91,96 @@ class display_object:
         self.type = type
 
     def close_gripper(self, close_true):
-        pass
+        set_io_srv = rospy.ServiceProxy('/ur_hardware_interface/set_io', SetIO)
+        msg = SetIORequest()
+        msg.fun = 1
+        msg.pin = 16
+        msg.state = int(close_true)
+        set_io_srv(msg)
+        time.sleep(5)
 
-    def calculate_action_plan(self, object_pose):
+    def calculate_action_plan(self, object_pose, publisher):
         if self.type == "pickup":
             #Pickup cube
+            starting_pose = self.robot_ref.get_current_state() #Joint space, beginning pose
+
             self.move_group_ref.set_start_state_to_current_state()
             waypoints = []
             new_pose2 = copy.deepcopy(object_pose)
-            new_pose2.position.z = new_pose2.position.z + 0.2
+            new_pose2.position.z = new_pose2.position.z + 0.5
             waypoints.append(copy.deepcopy(new_pose2))
-            (plan, fraction) = self.move_group_ref.compute_cartesian_path(
+            (plan1, fraction) = self.move_group_ref.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
                                    0.01,        # eef_step
                                    0.0)         # jump_threshold
 
-            self.move_group_ref.execute(plan)
-            self.move_group_ref.stop()
-            #self.move_group_ref.set_pose_target(new_pose)
-            #self.move_group_ref.go()
-            time.sleep(5)
-            print(2)
-
-            self.close_gripper(False)
-
-            self.move_group_ref.set_start_state_to_current_state()
+            starting_pose.joint_state.name = self.goto_plan.joint_trajectory.joint_names
+            starting_pose.joint_state.position = plan1.joint_trajectory.points[-1].positions
+            self.move_group_ref.set_start_state(starting_pose)
             waypoints = []
             new_pose = copy.deepcopy(object_pose)
-            new_pose.position.z = new_pose.position.z + 0.1
+            new_pose.position.z = new_pose.position.z + 0.2
             waypoints.append(copy.deepcopy(new_pose))
-            #self.move_group_ref.set_pose_target(new_pose)
-            #self.move_group_ref.go()
-            (plan, fraction) = self.move_group_ref.compute_cartesian_path(
+            (plan2, fraction) = self.move_group_ref.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
                                    0.01,        # eef_step
                                    0.0)         # jump_threshold
+            
 
-            self.move_group_ref.execute(plan)
-            self.move_group_ref.stop()
-            time.sleep(5)
-            print(3)
-
-            self.close_gripper(True)
-
-            self.move_group_ref.set_start_state_to_current_state()
+            starting_pose.joint_state.name = self.goto_plan.joint_trajectory.joint_names
+            starting_pose.joint_state.position = plan2.joint_trajectory.points[-1].positions
+            self.move_group_ref.set_start_state(starting_pose)
             waypoints = []
             waypoints.append(copy.deepcopy(new_pose2))
-            #self.move_group_ref.set_pose_target(new_pose)
-            #self.move_group_ref.go()
-            (plan, fraction) = self.move_group_ref.compute_cartesian_path(
+            (plan3, fraction) = self.move_group_ref.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
                                    0.01,        # eef_step
                                    0.0)         # jump_threshold
 
-            self.move_group_ref.execute(plan)
-            self.move_group_ref.stop()
+           
+            starting_pose.joint_state.name = self.goto_plan.joint_trajectory.joint_names
+            starting_pose.joint_state.position = plan3.joint_trajectory.points[-1].positions
+            self.move_group_ref.set_start_state(starting_pose)
+            waypoints = []
+            waypoints.append(self.pose_above_box)
+            (plan4, fraction) = self.move_group_ref.compute_cartesian_path(
+                                waypoints,   # waypoints to follow
+                                0.01,        # eef_step
+                                0.0)         # jump_threshold
 
-            if self.goto_plan is not None:
-                self.move_group_ref.go(list(self.goto_plan.joint_trajectory.points[-1].positions), wait=True)
 
+            display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+            display_trajectory.trajectory_start = self.robot_ref.get_current_state()
+            display_trajectory.trajectory.append(plan1)
+            display_trajectory.trajectory.append(plan2)
+            display_trajectory.trajectory.append(plan3)
+            display_trajectory.trajectory.append(plan4)
+            publisher.publish(display_trajectory)
+             
+            
+            print("Go above detected box")
+            self.move_group_ref.execute(plan1, wait=True)
+            self.close_gripper(False)
+            print("Go straight down to the box")
+            self.move_group_ref.execute(plan2, wait=True)
+            self.close_gripper(True)
+            print("Go up")
+            self.move_group_ref.execute(plan3, wait=True)
+            print("Goto start position")
+            self.move_group_ref.execute(plan4, wait=True)
+
+               
         elif self.type == "place":
-            self.plans.append((False))
+            time.sleep(5)
+            self.close_gripper(False)
 
-    def execute(self, target_object):
+
+    def execute(self, target_object, publisher):
         print("Executing goto plan")
         self.move_group_ref.execute(plan_msg=self.goto_plan, wait=True)
 
         print("Executing action plan")
-        self.calculate_action_plan(target_object)
+        self.calculate_action_plan(target_object, publisher)
 
         if self.last_box_plan is not None:
             self.move_group_ref.execute(plan_msg=self.last_box_plan, wait=True)
@@ -154,6 +188,9 @@ class display_object:
     def last_box(self, first_box):
         previouse_pose = self.robot_ref.get_current_state() #Joint space
         if self.goto_plan is None:
+            return
+        if len(self.goto_plan.joint_trajectory.points) == 0:
+            self.last_box_plan = None
             return
         
         previouse_pose.joint_state.name = self.goto_plan.joint_trajectory.joint_names
@@ -197,6 +234,10 @@ class RosPlanner:
         self.scene = moveit_commander.PlanningSceneInterface()
         group_name = "manipulator"
         self.group = moveit_commander.MoveGroupCommander(group_name)
+        self.group.set_planner_id("InformedRRTStar")
+        self.group.set_planning_time(25)
+        self.group.set_num_planning_attempts(5000)
+        self.group.allow_replanning(False)
         #Variables for keeping track of boxes
         self.boxes = []
         self.vis_paths = []
@@ -207,6 +248,11 @@ class RosPlanner:
         self.executing_thread = None
         self.feedback_msg = ExecutepathActionFeedback()
         self.result_msg = ExecutepathActionResult()
+        self.result_msg2 = ExecutespecificResult()
+
+        self.tf_buffer = tf2_ros.Buffer(rospy.Duration(100.0))  # tf buffer length
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
+
 
         self.replan = False
         replan_seconds = 5.0
@@ -218,14 +264,83 @@ class RosPlanner:
 
         self.boxes_subscriber = rospy.Subscriber("/boxes", Boxes, self.incoming_box, queue_size=10)
         self.vis_mode_subscriber = rospy.Subscriber("/vis_num", Int8MultiArray, self.change_mode)
-        self.physical_box = rospy.Subscriber("/physicalbox", PoseStamped, self.incoming_box_pose, queue_size=1)
+        self.physical_box = rospy.Subscriber("/detection", PoseStamped, self.incoming_box_pose, queue_size=1)
         self.vis_pub = rospy.Publisher( "visualization_marker", Marker, queue_size=10)
         self.box_res_pub = rospy.Publisher("/box_planner_status", BoxResponse, queue_size=10)
 
         self.action_server = actionlib.SimpleActionServer("planner_executer", ExecutepathAction, execute_cb=self.execute_cb, auto_start = False)
         self.action_server.start()
 
+        self.action_server2 = actionlib.SimpleActionServer("planner_give_executer", ExecutespecificAction, execute_cb=self.execute_cb2, auto_start = False)
+        self.action_server2.start()
+
         self.starting_pose = self.robot.get_current_state() #Joint space, beginning pose
+
+        # construct a message
+        joint_constraint2 = moveit_msgs.msg.JointConstraint()
+        joint_constraint2.joint_name = self.group.get_joints()[4]
+        print(joint_constraint2.joint_name)
+        joint_constraint2.position = -3.14/2.0
+        joint_constraint2.tolerance_above = 3.14/2.0
+        joint_constraint2.tolerance_below = 3.14/2.0
+        joint_constraint2.weight = 1
+
+        # construct a message
+        joint_constraint = moveit_msgs.msg.JointConstraint()
+        joint_constraint.joint_name = self.group.get_joints()[1]
+        print(joint_constraint.joint_name)
+        joint_constraint.position = 3.14/4.0
+        joint_constraint.tolerance_above = 3.14/2.0
+        joint_constraint.tolerance_below = 3.14/2.0
+        joint_constraint.weight = 1.0
+
+        # construct a message
+        joint_constraint3 = moveit_msgs.msg.JointConstraint()
+        joint_constraint3.joint_name = self.group.get_joints()[2]
+        print(joint_constraint3.joint_name)
+        joint_constraint3.position = -3.14/2.0
+        joint_constraint3.tolerance_above = 3.14/3.0
+        joint_constraint3.tolerance_below = 3.14/3.0
+        joint_constraint3.weight = 1.0
+
+        joint_constraint5 = moveit_msgs.msg.JointConstraint()
+        joint_constraint5.joint_name = self.group.get_joints()[5]
+        print(joint_constraint5.joint_name)
+        joint_constraint5.position = 0
+        joint_constraint5.tolerance_above = 3.14/3.0
+        joint_constraint5.tolerance_below = 3.14/3.0
+        joint_constraint5.weight = 1.0
+
+        joint_constraint_list = []
+        joint_constraint_list.append(joint_constraint)
+        joint_constraint_list.append(joint_constraint2)
+        joint_constraint_list.append(joint_constraint3)
+        #joint_constraint_list.append(joint_constraint5)
+
+        constraint_list = moveit_msgs.msg.Constraints()
+        constraint_list.name = 'middle_of_travel'
+        constraint_list.joint_constraints = joint_constraint_list
+
+        self.group.set_path_constraints(constraint_list)
+
+        rospy.wait_for_service("/ur_hardware_interface/set_io")
+
+    def execute_cb2(self, goal):
+        my_rate = rospy.Rate(10)
+        boxid = int(goal.action_string.split(':')[0])
+        print(boxid)
+        if int(goal.action_string.split(':')[1]) == 0:
+            self.group.execute(plan_msg=self.boxes[boxid].goto_plan, wait=True)
+
+        elif int(goal.action_string.split(':')[1]) == 2:
+            self.group.execute(plan_msg=self.boxes[boxid].last_box_plan, wait=True)
+            
+        else:
+            self.boxes[boxid].calculate_action_plan(self.pickup_box_pose, self.display_trajectory_publisher)
+        
+        self.result_msg2.succededTrue = False
+        self.action_server2.set_succeeded(self.result_msg2)
+        
 
 
     def execute_cb(self, goal):
@@ -283,40 +398,47 @@ class RosPlanner:
             print("Executing box: {}".format(object_counter))
 
             #=========== Testing Target =====
-            target = self.boxes[object_counter].pose_above_box
-            target.position.z -= 0.2
-            print("Using made up target")
-
-            self.boxes[object_counter].execute(target)
+            #target = self.boxes[object_counter].pose_above_box
+            #target.position.z -= 0.2
+            #print("Using made up target")
+            #print(self.pickup_box_pose)
+            self.boxes[object_counter].execute(self.pickup_box_pose, self.display_trajectory_publisher)
             object_counter += 1
 
         self.executing_finished = True
             
     def run(self):
         #rospy.spin()
-        while True:
+        while not rospy.is_shutdown():
             self.replan_time.sleep()
             if self.replan:
-                print("Planning")
-                for id, box in enumerate(self.boxes):
-                    if id != 0:
-                        if self.boxes[id - 1].goto_plan is not None:
-                            previouse_pose = self.robot.get_current_state()
-                            previouse_pose.joint_state.name = self.boxes[id - 1].goto_plan.joint_trajectory.joint_names
-                            previouse_pose.joint_state.position = self.boxes[id - 1].goto_plan.joint_trajectory.points[-1].positions
-                            box.update_previouse_pose(previouse_pose)
-                            if box.goto_plan is None:
-                                box.calculate_plans()
-                    else:
+                for x in self.boxes:
+                    x.goto_plan = None
+                    self.replan = False
+                    self.last_box_plan = False
+
+            #print("Planning")
+            for id, box in enumerate(self.boxes):
+                if id != 0:
+                    if self.boxes[id - 1].goto_plan is not None:
+                        if len(self.boxes[id -1].goto_plan.joint_trajectory.points) == 0:
+                            continue
+                        previouse_pose = self.robot.get_current_state()
+                        previouse_pose.joint_state.name = self.boxes[id - 1].goto_plan.joint_trajectory.joint_names
+                        previouse_pose.joint_state.position = self.boxes[id - 1].goto_plan.joint_trajectory.points[-1].positions
+                        box.update_previouse_pose(previouse_pose)
                         if box.goto_plan is None:
                             box.calculate_plans()
+                else:
+                    if box.goto_plan is None:
+                        box.calculate_plans()
 
                 if self.boxes[-1].last_box_plan is None:
                     self.boxes[-1].last_box(self.starting_pose)
 
-                self.replan = False
+                
             
-                self.update_visualizer()
+            self.update_visualizer()
 
 
     def incoming_box(self, msg):
@@ -341,7 +463,10 @@ class RosPlanner:
             return
         else:
             self.boxes[msg.boxid].update_pose(msg.pose, (msg.scalex, msg.scaley, msg.scalez)) #Cartesian space
-            self.replan = True
+            self.boxes[msg.boxid].goto_plan = None
+            if len(self.boxes) > msg.boxid + 1:
+                self.boxes[msg.boxid + 1].goto_plan = None
+            #self.replan = True
             # if len(self.boxes) > msg.boxid + 1:
             #     previouse_pose.joint_state.position = self.boxes[msg.boxid].goto_plan.joint_trajectory.points[-1].positions
             #     self.boxes[msg.boxid + 1].update_previouse_pose(previouse_pose)
@@ -383,17 +508,34 @@ class RosPlanner:
             for id, box in enumerate(self.boxes):
                 if box.goto_plan is not None:
                     display_trajectory.trajectory.append(box.goto_plan)
-
+            
             if self.boxes[-1].last_box_plan is not None:
                 display_trajectory.trajectory.append(self.boxes[-1].last_box_plan)
 
             self.display_trajectory_publisher.publish(display_trajectory)
-        except:
+        except Exception as e:
+            print(e)
             print("Missing a plan, cannot visualise")
 
 
     def incoming_box_pose(self, msg):
-        self.pickup_box_pose = msg.pose
+        #print(msg)
+        transform = self.tf_buffer.lookup_transform("base_link",
+                                       # source frame:
+                                       msg.header.frame_id,
+                                       # get the tf at the time the pose was valid
+                                       msg.header.stamp,
+                                       # wait for at most 1 second for transform, otherwise throw
+                                       rospy.Duration(1.0))
+
+        pose_transformed = tf2_geometry_msgs.do_transform_pose(msg, transform)
+        #print(pose_transformed)
+        self.pickup_box_pose = pose_transformed.pose
+        
+        self.pickup_box_pose.orientation.x = 1
+        self.pickup_box_pose.orientation.y = 0
+        self.pickup_box_pose.orientation.z = 0
+        self.pickup_box_pose.orientation.w = 0
 
 if __name__ == "__main__":
     moveit_commander.roscpp_initialize(sys.argv)

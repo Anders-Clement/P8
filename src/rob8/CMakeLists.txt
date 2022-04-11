@@ -61,6 +61,7 @@ add_message_files(
 add_action_files(
   FILES
   Executepath.action
+  Executespecific.action
 #   Action2.action
 )
 
