@@ -9,6 +9,7 @@ install ros-noetic-desktop-full as per the instructions on the ROS wiki site
 additional installs:
 sudo apt install ros-noetic-rosbridge-suite
 sudo apt install ros-noetic-moveit
+sudo apt install ros-noetic-industrial-trajectory-filters
 
 UR10 repositories must be installed after cloning, do the following from the root of this workspace:
 ```
