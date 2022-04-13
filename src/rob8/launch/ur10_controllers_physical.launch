@@ -13,6 +13,9 @@
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
         <arg name="address" value="hanslaptop.local"/>
     </include> 
+
+    <include file="$(find rob8)/launch/camera_detect.launch">
+    </include>
     
     <node pkg="rob8" type="Planner_script.py" name="trajectory_planner" />
     <node pkg="rob8" type="ui_scenechange.py" name="scenechangeui" />

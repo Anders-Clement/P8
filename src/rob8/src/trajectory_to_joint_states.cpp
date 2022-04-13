@@ -3,6 +3,11 @@
 
 void Trajectory_to_joint_states::display_trajectory_callback(const moveit_msgs::DisplayTrajectoryConstPtr& msg)
 {
+    if (msg->trajectory.size() == 0) {
+        ROS_WARN_ONCE_NAMED("", "Got empty trajectory");
+        return;
+    }
+
     current_trajectory.joint_names = msg->trajectory[0].joint_trajectory.joint_names;
     current_trajectory.header = msg->trajectory[0].joint_trajectory.header;
     current_trajectory.points.clear();

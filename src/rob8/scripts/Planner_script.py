@@ -20,7 +20,7 @@ import actionlib
 from moveit_commander.conversions import pose_to_list
 from threading import Thread
 import moveit_msgs.msg
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Int16
 from ur_msgs.srv import SetIO, SetIORequest, SetIOResponse
 
 import tf2_ros
@@ -85,11 +85,15 @@ class display_object:
         new_pose.orientation.w = 0
         self.pose_above_box = new_pose
 
+        self.goto_plan = None
+        self.last_box_plan = None
+
 
     def update_type(self, type):
         self.type = type
 
     def close_gripper(self, close_true):
+        rospy.wait_for_service("/ur_hardware_interface/set_io")
         set_io_srv = rospy.ServiceProxy('/ur_hardware_interface/set_io', SetIO)
         msg = SetIORequest()
         msg.fun = 1
@@ -99,7 +103,7 @@ class display_object:
         time.sleep(5)
 
     def calculate_action_plan(self, object_pose, publisher):
-        if self.type == "pickup":
+        if self.type == "pickup" or self.type[1] == 'i':
             #Pickup cube
             starting_pose = self.robot_ref.get_current_state() #Joint space, beginning pose
 
@@ -211,6 +215,7 @@ class display_object:
         marker.id = id
         marker.type = 1
         marker.action = 0
+        marker.lifetime = rospy.Duration(10)
 
         new_pose = copy.deepcopy(self.pose)
         #new_pose.position.x = self.pose.position.x + self.scale[0] / 2
@@ -266,6 +271,7 @@ class RosPlanner:
         self.physical_box = rospy.Subscriber("/detection", PoseStamped, self.incoming_box_pose, queue_size=1)
         self.vis_pub = rospy.Publisher( "visualization_marker", Marker, queue_size=10)
         self.box_res_pub = rospy.Publisher("/box_planner_status", BoxResponse, queue_size=10)
+        self.scene_change_sub = rospy.Subscriber("/scene/change", Int16, self.scene_change, queue_size=2)
 
         self.action_server = actionlib.SimpleActionServer("planner_executer", ExecutepathAction, execute_cb=self.execute_cb, auto_start = False)
         self.action_server.start()
@@ -306,15 +312,15 @@ class RosPlanner:
         joint_constraint5.joint_name = self.group.get_joints()[5]
         print(joint_constraint5.joint_name)
         joint_constraint5.position = 0
-        joint_constraint5.tolerance_above = 3.14/3.0
-        joint_constraint5.tolerance_below = 3.14/3.0
+        joint_constraint5.tolerance_above = 3.14
+        joint_constraint5.tolerance_below = 3.14
         joint_constraint5.weight = 1.0
 
         joint_constraint_list = []
         joint_constraint_list.append(joint_constraint)
         joint_constraint_list.append(joint_constraint2)
         joint_constraint_list.append(joint_constraint3)
-        #joint_constraint_list.append(joint_constraint5)
+        joint_constraint_list.append(joint_constraint5)
 
         constraint_list = moveit_msgs.msg.Constraints()
         constraint_list.name = 'middle_of_travel'
@@ -322,7 +328,9 @@ class RosPlanner:
 
         self.group.set_path_constraints(constraint_list)
 
-        rospy.wait_for_service("/ur_hardware_interface/set_io")
+    def scene_change(self, msg):
+        self.boxes = []
+        rospy.logwarn("Clearing box buffer")
 
     def execute_cb2(self, goal):
         my_rate = rospy.Rate(10)
@@ -340,7 +348,6 @@ class RosPlanner:
         self.result_msg2.succededTrue = False
         self.action_server2.set_succeeded(self.result_msg2)
         
-
 
     def execute_cb(self, goal):
         self.executing_finished = False
@@ -441,9 +448,13 @@ class RosPlanner:
 
 
     def incoming_box(self, msg):
-        if (msg.type == "delete"):
+        if msg.boxid + 1 < len(self.boxes):
+            self.boxes[msg.boxid + 1].goto_Plan = None
+
+        if (msg.type.data == "delete"):
             self.boxes.pop(msg.boxid)
             self.replan = True
+            print("Got delete")
             # if len(self.boxes) > msg.boxid + 1:
             #     previouse_pose.joint_state.position = self.boxes[msg.boxid - 1].goto_plan.joint_trajectory.points[-1].positions
             #     self.boxes[msg.boxid].update_previouse_pose(previouse_pose)
