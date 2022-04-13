@@ -7,7 +7,6 @@ import copy
 import threading
 import time
 
-from sqlalchemy import false
 import rospy
 import moveit_commander
 import moveit_msgs.msg
