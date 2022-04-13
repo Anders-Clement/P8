@@ -71,11 +71,11 @@ void Trajectory_to_joint_states::spin()
         msg.name = current_trajectory.joint_names;
 
         joint_state_pub.publish(msg);
-        for(int i = 0; i < current_point->positions.size(); i++)
-        {
-            current_point->positions[i] += current_point->velocities[i];
-            current_point->velocities[i] += current_point->accelerations[i];
-        }
+        // for(int i = 0; i < current_point->positions.size(); i++)
+        // {
+        //     current_point->positions[i] += current_point->velocities[i];
+        //     current_point->velocities[i] += current_point->accelerations[i];
+        // }
     }
 }
 
