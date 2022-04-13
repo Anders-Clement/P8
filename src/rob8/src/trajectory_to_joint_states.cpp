@@ -30,7 +30,7 @@ Trajectory_to_joint_states::Trajectory_to_joint_states(ros::NodeHandle* nh)
 
 void Trajectory_to_joint_states::spin()
 {
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(50);
     while (ros::ok())
     {
         ros::spinOnce();
