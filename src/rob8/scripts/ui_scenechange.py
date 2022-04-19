@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showinfo
+import random
 
 import rospy
 from std_msgs.msg import String, Int16, Int32
@@ -28,6 +29,7 @@ class App(tk.Tk):
     def incoming_scenes(self, msg):
         incoming_data = msg.data
         array = incoming_data.split(',')
+        random.shuffle(array)
         self.listbox.delete(0, tk.END)
         for text in array:
             name, id = text.split(':')
