@@ -13,7 +13,7 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 from std_msgs.msg import String, Int8MultiArray
 from geometry_msgs.msg import PoseStamped
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 from rob8.msg import Boxes, ExecutepathAction, ExecutepathActionFeedback, ExecutepathActionGoal, ExecutepathActionResult, BoxResponse
 from rob8.msg import ExecutespecificAction, ExecutespecificActionGoal, ExecutespecificFeedback, ExecutespecificResult
 import actionlib
@@ -39,11 +39,12 @@ class display_object:
         #Moveit commander parameters
         self.move_group_ref = move_group
         self.robot_ref = robot
+        self.z_offset = 0.2
 
         new_pose = copy.deepcopy(self.pose)
         new_pose.position.x = self.pose.position.x #+ self.scale[0] / 2
         new_pose.position.y = self.pose.position.y #+ self.scale[1] / 2
-        new_pose.position.z = self.pose.position.z + self.scale[2] / 2 + 0.5
+        new_pose.position.z = self.pose.position.z + self.scale[2] / 2 + self.z_offset
         new_pose.orientation.x = 1
         new_pose.orientation.y = 0
         new_pose.orientation.z = 0
@@ -78,7 +79,7 @@ class display_object:
         new_pose = copy.deepcopy(self.pose)
         new_pose.position.x = self.pose.position.x #+ self.scale[0] / 2
         new_pose.position.y = self.pose.position.y #+ self.scale[1] / 2
-        new_pose.position.z = self.pose.position.z + self.scale[2] / 2
+        new_pose.position.z = self.pose.position.z + self.scale[2] / 2 + self.z_offset
         new_pose.orientation.x = 1
         new_pose.orientation.y = 0
         new_pose.orientation.z = 0
@@ -100,7 +101,7 @@ class display_object:
         msg.pin = 16
         msg.state = int(close_true)
         set_io_srv(msg)
-        time.sleep(5)
+        time.sleep(1)
 
     def calculate_action_plan(self, object_pose, publisher):
         if self.type == "pickup" or self.type[1] == 'i':
@@ -110,7 +111,7 @@ class display_object:
             self.move_group_ref.set_start_state_to_current_state()
             waypoints = []
             new_pose2 = copy.deepcopy(object_pose)
-            new_pose2.position.z = new_pose2.position.z + 0.5
+            new_pose2.position.z = new_pose2.position.z + self.z_offset
             waypoints.append(copy.deepcopy(new_pose2))
             (plan1, fraction) = self.move_group_ref.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
@@ -174,8 +175,9 @@ class display_object:
 
                
         elif self.type == "place":
-            time.sleep(5)
+            #time.sleep(5)
             self.close_gripper(False)
+            #time.sleep(0.2)
 
 
     def execute(self, target_object, publisher):
@@ -215,7 +217,7 @@ class display_object:
         marker.id = id
         marker.type = 1
         marker.action = 0
-        marker.lifetime = rospy.Duration(10)
+        marker.lifetime = rospy.Duration(30)
 
         new_pose = copy.deepcopy(self.pose)
         #new_pose.position.x = self.pose.position.x + self.scale[0] / 2
@@ -229,7 +231,8 @@ class display_object:
         marker.color.r = 0.0
         marker.color.g = 1.0
         marker.color.b = 0.0
-        vis_pub.publish( marker )
+        return marker
+        #vis_pub.publish( marker )
 
 class RosPlanner:
     def __init__(self) -> None:
@@ -238,9 +241,9 @@ class RosPlanner:
         self.scene = moveit_commander.PlanningSceneInterface()
         group_name = "manipulator"
         self.group = moveit_commander.MoveGroupCommander(group_name)
-        self.group.set_planner_id("InformedRRTStar")
-        self.group.set_planning_time(25)
-        self.group.set_num_planning_attempts(5000)
+        self.group.set_planner_id("RRTConnect")
+        self.group.set_planning_time(5)
+        self.group.set_num_planning_attempts(1000)
         self.group.allow_replanning(False)
         #Variables for keeping track of boxes
         self.boxes = []
@@ -269,7 +272,7 @@ class RosPlanner:
         self.boxes_subscriber = rospy.Subscriber("/boxes", Boxes, self.incoming_box, queue_size=10)
         self.vis_mode_subscriber = rospy.Subscriber("/vis_num", Int8MultiArray, self.change_mode)
         self.physical_box = rospy.Subscriber("/detection", PoseStamped, self.incoming_box_pose, queue_size=1)
-        self.vis_pub = rospy.Publisher( "visualization_marker", Marker, queue_size=10)
+        self.vis_pub = rospy.Publisher( "visualization_markers", MarkerArray, queue_size=10)
         self.box_res_pub = rospy.Publisher("/box_planner_status", BoxResponse, queue_size=10)
         self.scene_change_sub = rospy.Subscriber("/scene/change", Int16, self.scene_change, queue_size=2)
 
@@ -423,26 +426,34 @@ class RosPlanner:
                     self.replan = False
                     self.last_box_plan = False
 
-            #print("Planning")
-            for id, box in enumerate(self.boxes):
-                if id != 0:
-                    if self.boxes[id - 1].goto_plan is not None:
-                        if len(self.boxes[id -1].goto_plan.joint_trajectory.points) == 0:
-                            continue
-                        previouse_pose = self.robot.get_current_state()
-                        previouse_pose.joint_state.name = self.boxes[id - 1].goto_plan.joint_trajectory.joint_names
-                        previouse_pose.joint_state.position = self.boxes[id - 1].goto_plan.joint_trajectory.points[-1].positions
-                        box.update_previouse_pose(previouse_pose)
+            if len(self.boxes) <= 0:
+                print("Missing boxes")
+                continue
+
+            self.group.clear_pose_targets()
+
+            try:
+
+                #print("Planning")
+                for id, box in enumerate(self.boxes):
+                    if id != 0:
+                        if self.boxes[id - 1].goto_plan is not None:
+                            if len(self.boxes[id -1].goto_plan.joint_trajectory.points) == 0:
+                                continue
+                            previouse_pose = self.robot.get_current_state()
+                            previouse_pose.joint_state.name = self.boxes[id - 1].goto_plan.joint_trajectory.joint_names
+                            previouse_pose.joint_state.position = self.boxes[id - 1].goto_plan.joint_trajectory.points[-1].positions
+                            box.update_previouse_pose(previouse_pose)
+                            if box.goto_plan is None:
+                                box.calculate_plans()
+                    else:
                         if box.goto_plan is None:
                             box.calculate_plans()
-                else:
-                    if box.goto_plan is None:
-                        box.calculate_plans()
 
-                if self.boxes[-1].last_box_plan is None:
-                    self.boxes[-1].last_box(self.starting_pose)
-
-                
+                    if self.boxes[-1].last_box_plan is None:
+                        self.boxes[-1].last_box(self.starting_pose)
+            except Exception as e:
+                print(e)
             
             self.update_visualizer()
 
@@ -511,8 +522,13 @@ class RosPlanner:
         display_trajectory.trajectory_start = self.robot.get_current_state()
         display_trajectory.trajectory.clear()
 
+        marker_array = MarkerArray()
+
         for id, box in enumerate(self.boxes):
-            box.publish_cube(self.vis_pub, id)
+            marker_array.markers.append(box.publish_cube(self.vis_pub, id))
+
+
+        self.vis_pub.publish(marker_array)
 
         try:
             for id, box in enumerate(self.boxes):

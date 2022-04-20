@@ -12,16 +12,17 @@ void Trajectory_to_joint_states::display_trajectory_callback(const moveit_msgs::
     current_trajectory.header = msg->trajectory[0].joint_trajectory.header;
     current_trajectory.points.clear();
 
+    float duration = 0.0; //current_trajectory.points.back().time_from_start.toSec();
     // append all points from all trajectories:
     for(auto trajectory : msg->trajectory)
     {
+        duration += trajectory.joint_trajectory.points.back().time_from_start.toSec();
         // trajectory.joint_trajectory.
         for(auto point : trajectory.joint_trajectory.points)
             current_trajectory.points.push_back(point);
     }
 
     display_start_time = ros::Time::now();
-    float duration = current_trajectory.points.back().time_from_start.toSec();
     ROS_INFO("path duration: %f, average points per sec: %f",
         duration,
         (float)current_trajectory.points.size()/duration);
@@ -39,8 +40,6 @@ void Trajectory_to_joint_states::spin()
     while (ros::ok())
     {
         ros::spinOnce();
-        loop_rate.sleep();
-
         if(current_trajectory.points.empty())
             continue;
 
@@ -51,13 +50,26 @@ void Trajectory_to_joint_states::spin()
 
         for(int i = 0; i < current_trajectory.points.size(); i++)
         {
+            sensor_msgs::JointState msg;
+            msg.header = current_trajectory.header;
+            msg.position = current_trajectory.points[i].positions;
+            msg.name = current_trajectory.joint_names;
+
+            joint_state_pub.publish(msg);
+
+            ros::spinOnce();
+            loop_rate.sleep();
+
+            /*
             if(current_trajectory.points[i].time_from_start.toNSec() * SPEED_FACTOR < display_run_time.toNSec())
                 current_point = &current_trajectory.points[i];
             else
-                break;
+                break;*/
         }
 
-        if(current_point == nullptr || *current_point == current_trajectory.points[current_trajectory.points.size()-1])
+        ros::Duration(1).sleep();
+
+        /*if(current_point == nullptr || *current_point == current_trajectory.points[current_trajectory.points.size()-1])
         {
             display_start_time = ros::Time::now();
             // ROS_INFO("done, looping around");
@@ -75,7 +87,7 @@ void Trajectory_to_joint_states::spin()
         msg.position = current_point->positions;
         msg.name = current_trajectory.joint_names;
 
-        joint_state_pub.publish(msg);
+        joint_state_pub.publish(msg);*/
         // for(int i = 0; i < current_point->positions.size(); i++)
         // {
         //     current_point->positions[i] += current_point->velocities[i];

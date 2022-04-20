@@ -9,6 +9,7 @@ import rospy
 from std_msgs.msg import String, Int16, Int32
   
 class App(tk.Tk):
+    old_scene_objects = ""
     def __init__(self):
         super().__init__()
         
@@ -28,8 +29,12 @@ class App(tk.Tk):
 
     def incoming_scenes(self, msg):
         incoming_data = msg.data
+        
+        if incoming_data == self.old_scene_objects:
+            return
+        self.old_scene_objects = incoming_data
+
         array = incoming_data.split(',')
-        random.shuffle(array)
         self.listbox.delete(0, tk.END)
         for text in array:
             name, id = text.split(':')
