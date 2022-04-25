@@ -39,7 +39,7 @@ class display_object:
         #Moveit commander parameters
         self.move_group_ref = move_group
         self.robot_ref = robot
-        self.z_offset = 0.2
+        self.z_offset = 0.3
 
         new_pose = copy.deepcopy(self.pose)
         new_pose.position.x = self.pose.position.x #+ self.scale[0] / 2
@@ -123,7 +123,7 @@ class display_object:
             self.move_group_ref.set_start_state(starting_pose)
             waypoints = []
             new_pose = copy.deepcopy(object_pose)
-            new_pose.position.z = new_pose.position.z + 0.2
+            new_pose.position.z = new_pose.position.z + self.z_offset - 0.05
             waypoints.append(copy.deepcopy(new_pose))
             (plan2, fraction) = self.move_group_ref.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
@@ -427,6 +427,7 @@ class RosPlanner:
                     self.last_box_plan = False
 
             if len(self.boxes) <= 0:
+                self.update_visualizer()
                 print("Missing boxes")
                 continue
 
@@ -476,6 +477,10 @@ class RosPlanner:
             #     previouse_pose.joint_state.position = self.boxes[msg.boxid - 1].goto_plan.joint_trajectory.points[-1].positions #Joint space
             
             self.boxes.append(display_object(msg.pose, (msg.scalex, msg.scaley, msg.scalez), msg.type.data, self.group, self.robot, self.starting_pose))
+
+            if msg.boxid > 0:
+                self.boxes[msg.boxid-1].last_box_plan = None
+
             print("Created box {}".format(msg.boxid))
             self.replan = True
         elif (msg.boxid > len(self.boxes) - 1):
@@ -538,10 +543,11 @@ class RosPlanner:
             if self.boxes[-1].last_box_plan is not None:
                 display_trajectory.trajectory.append(self.boxes[-1].last_box_plan)
 
-            self.display_trajectory_publisher.publish(display_trajectory)
         except Exception as e:
             print(e)
-            print("Missing a plan, cannot visualise")
+            rospy.logwarn("Missing a plan, cannot visualise")
+
+        self.display_trajectory_publisher.publish(display_trajectory)
 
 
     def incoming_box_pose(self, msg):

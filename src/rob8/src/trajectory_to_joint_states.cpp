@@ -5,6 +5,7 @@ void Trajectory_to_joint_states::display_trajectory_callback(const moveit_msgs::
 {
     if (msg->trajectory.size() == 0) {
         ROS_WARN_ONCE_NAMED("", "Got empty trajectory");
+        current_trajectory.points.clear();
         return;
     }
 
