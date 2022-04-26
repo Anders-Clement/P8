@@ -6,26 +6,57 @@ from tkinter.messagebox import showinfo
 import random
 
 import rospy
-from std_msgs.msg import String, Int16, Int32
+from std_msgs.msg import String, Int16, Int32, Bool
+import actionlib
+import rob8.msg
   
 class App(tk.Tk):
     old_scene_objects = ""
     def __init__(self):
         super().__init__()
         
-        self.geometry("200x250")
+        self.geometry("200x300")
         self.lbl2 = tk.Label(self,text = "Clients connected: 0")
-        self.lbl = tk.Label(self,text = "Double click to change scene")  
+        self.lbl = tk.Label(self,text = "Double click to change scene")
+        self.experiemnt_status = tk.Label(self,text="Status: None")
+        self.stopbutton = tk.Button(self,text = "Stop Experiment",command=self.pressed_stop)
+        self.gobutton = tk.Button(self, text = "Execute route",command=self.execute)
         self.listbox = tk.Listbox(self) 
         self.listbox.bind('<Double-1>', self.list_click)
 
         self.lbl2.pack()
-        self.lbl.pack()  
-        self.listbox.pack()  
+        self.lbl.pack()
+        self.experiemnt_status.pack()
+        self.listbox.pack()
+        self.stopbutton.pack()
+        self.gobutton.pack()
 
         self.namesub = rospy.Subscriber("/scene/names", String, self.incoming_scenes)
         self.connectionsub = rospy.Subscriber("/client_count", Int32, self.incoming_clinets)
+        self.statussub = rospy.Subscriber("/experiment/status", String, self.incoming_status)
         self.changepub = rospy.Publisher("/scene/change", Int16, queue_size=16)
+        self.stoppub = rospy.Publisher("/experiment/stop", Bool, queue_size=1)
+
+        self.client = actionlib.SimpleActionClient('planner_executer', rob8.msg.ExecutepathAction)
+
+
+    def execute(self):
+        self.client.wait_for_server()
+        goal = rob8.msg.ExecutepathActionGoal()
+        goal.goal.runpath = True
+        print(goal)
+        self.client.send_goal(goal.goal)
+        self.client.wait_for_result(timeout=60)
+        print(self.client.get_result())
+
+    def incoming_status(self, msg):
+        self.experiemnt_status.config(text="Status: " + msg.data)
+
+    def pressed_stop(self):
+        new_msg = Bool()
+        new_msg.data = True
+        rospy.loginfo("Publishing stop")
+        self.stoppub.publish(new_msg)
 
     def incoming_scenes(self, msg):
         incoming_data = msg.data

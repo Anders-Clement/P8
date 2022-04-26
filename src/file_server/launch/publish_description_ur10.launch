@@ -19,9 +19,9 @@ limitations under the License.
 		<arg name="port" value="9090" />
 	</include>
 
-	<arg name="urdf_file" default="$(find xacro)/xacro '$(find ur_description)/urdf/ur10.xacro'" />
+	<!--arg name="urdf_file" default="$(find xacro)/xacro '$(find rob8)/urdf/ur10_hand.xacro'" /-->
 	
 	<param name="robot/name" value="UR10" />
-	<param name="robot_description" command="$(arg urdf_file)" />
+	<!-- <param name="robot_description" command="$(arg urdf_file)" /> -->
 
 </launch>
