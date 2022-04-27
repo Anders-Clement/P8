@@ -6,7 +6,6 @@ import sys
 import copy
 import threading
 import time
-
 import rospy
 import moveit_commander
 import moveit_msgs.msg
@@ -271,6 +270,7 @@ class RosPlanner:
         self.boxes = []
         self.vis_paths = []
         self.pickup_box_pose = None
+        self.box_buffer : list[display_object] = []
         # Action server variables
         self.executing_boxid = 0
         self.executing_finished = False
@@ -479,7 +479,7 @@ class RosPlanner:
         if msg.type.data == "delete":
             self.boxes.pop(msg.boxid)
             self.replan = True
-            print("Got delete")
+            print("Got delete", msg.boxid)
             # if len(self.boxes) > msg.boxid + 1:
             #     previouse_pose.joint_state.position = self.boxes[msg.boxid - 1].goto_plan.joint_trajectory.points[-1].positions
             #     self.boxes[msg.boxid].update_previouse_pose(previouse_pose)
@@ -499,7 +499,8 @@ class RosPlanner:
             print("Created box {}".format(msg.boxid))
             self.replan = True
         elif msg.boxid > len(self.boxes) - 1:
-            print("Oliver fucked the order up")
+            print("Anders fucked the order up")
+            self.box_buffer.append(msg)
             # Implement message buffer for out of order boxes, ie oliver fucked up the order
             return
         else:
@@ -520,8 +521,33 @@ class RosPlanner:
 
         # self.boxes[-1].last_box(self.starting_pose)
 
+        counter_index = 0
+        done_sorting = True
+        while len(self.box_buffer) > 0:
+            if counter_index == 0:
+                done_sorting = True
+            
+            if counter_index >= len(self.box_buffer):
+                counter_index = 0
+                if done_sorting:
+                    break
+                continue
+
+            old_msg = self.box_buffer[counter_index]
+
+            if old_msg.boxid == len(self.boxes):
+                print("Adding box: ", old_msg.boxid)
+                self.incoming_box(self.box_buffer.pop(counter_index))
+                done_sorting = False
+
+            counter_index += 1
+
+
         print("Tracking boxes: {}".format(len(self.boxes)))
         self.update_visualizer()
+
+        for id, box in enumerate(self.boxes):
+            print(id, box.type)
 
     def change_mode(self, msg):
         if len(msg.data) == 0:

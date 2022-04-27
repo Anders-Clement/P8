@@ -103,7 +103,6 @@ void Trajectory_to_joint_states::spin()
 
 int main(int argc, char **argv)
 {
-
     ros::init(argc, argv, "trajectory_to_joint_states");
     auto nh = ros::NodeHandle();
     auto traj_to_joint_states = Trajectory_to_joint_states(&nh);

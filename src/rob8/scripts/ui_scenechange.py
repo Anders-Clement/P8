@@ -20,7 +20,7 @@ class App(tk.Tk):
         self.lbl = tk.Label(self,text = "Double click to change scene")
         self.experiemnt_status = tk.Label(self,text="Status: None")
         self.stopbutton = tk.Button(self,text = "Stop Experiment",command=self.pressed_stop)
-        self.gobutton = tk.Button(self, text = "Execute route",command=self.execute)
+        self.gobutton = tk.Button(self, text = "Execute plans",command=self.execute)
         self.listbox = tk.Listbox(self) 
         self.listbox.bind('<Double-1>', self.list_click)
 
