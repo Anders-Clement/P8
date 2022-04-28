@@ -28,7 +28,7 @@ import tf2_geometry_msgs
 
 
 class display_object:
-    def __init__(self, pose, scale, type_s, move_group, robot, previouse_pose) -> None:
+    def __init__(self, pose, scale, type_s, move_group : moveit_commander.MoveGroupCommander, robot, previouse_pose) -> None:
         self.goto_plan = None
         self.last_box_plan = None
 
@@ -38,7 +38,7 @@ class display_object:
         self.scale = scale
         self.previouse_pose = previouse_pose  # Previosue pose is in joint_state
         # Moveit commander parameters
-        self.move_group_ref = move_group
+        self.move_group_ref : moveit_commander.MoveGroupCommander = move_group
         self.robot_ref = robot
         self.z_offset = 0.3
 
@@ -54,11 +54,19 @@ class display_object:
         new_pose.orientation.w = 0
         self.pose_above_box = new_pose
 
-    def calculate_plans(self):
+    def calculate_plans(self, above_goto_plan = None):
         # Position above the virtual box
         old_robot_state = copy.deepcopy(self.previouse_pose)
         self.move_group_ref.set_start_state(old_robot_state)
-        self.move_group_ref.set_pose_target(self.pose_above_box)
+        if above_goto_plan is None:
+            self.move_group_ref.set_pose_target(self.pose_above_box)
+            print("Planning for pose")
+        elif self.last_box_plan is not None:
+            self.move_group_ref.set_joint_value_target(self.last_box_plan.joint_trajectory.points[0].positions[:6])
+            print("planning for joint angles")
+        else:
+            self.move_group_ref.set_joint_value_target(above_goto_plan.joint_trajectory.points[0].positions[:6])
+            print("planning for joint angles")
 
         print("Velocity scaling set to 1")
         self.move_group_ref.set_max_acceleration_scaling_factor(0.1)
@@ -258,19 +266,19 @@ class display_object:
 class RosPlanner:
     def __init__(self) -> None:
         # Moveit commander interfaces
-        self.robot = moveit_commander.RobotCommander()
-        self.scene = moveit_commander.PlanningSceneInterface()
-        group_name = "manipulator"
-        self.group = moveit_commander.MoveGroupCommander(group_name)
+        self.robot : moveit_commander.RobotCommander            = moveit_commander.RobotCommander()
+        self.scene : moveit_commander.PlanningSceneInterface    = moveit_commander.PlanningSceneInterface()
+        group_name : String                                     = "manipulator"
+        self.group : moveit_commander.MoveGroupCommander        = moveit_commander.MoveGroupCommander(group_name)
         self.group.set_planner_id("RRTConnect")
-        self.group.set_planning_time(5)
+        self.group.set_planning_time(1)
         self.group.set_num_planning_attempts(1000)
         self.group.allow_replanning(False)
         # Variables for keeping track of boxes
-        self.boxes = []
+        self.boxes : list[display_object]= []
         self.vis_paths = []
         self.pickup_box_pose = None
-        self.box_buffer : list[display_object] = []
+        self.box_buffer : list[Boxes] = []
         # Action server variables
         self.executing_boxid = 0
         self.executing_finished = False
@@ -342,7 +350,15 @@ class RosPlanner:
         joint_constraint5.tolerance_below = 3.14
         joint_constraint5.weight = 1.0
 
-        joint_constraint_list = [joint_constraint, joint_constraint2, joint_constraint3, joint_constraint5]
+        joint_constraint6 = moveit_msgs.msg.JointConstraint()
+        joint_constraint6.joint_name = self.group.get_joints()[6]
+        print(joint_constraint6.joint_name)
+        joint_constraint6.position = 0
+        joint_constraint6.tolerance_above = 3.14
+        joint_constraint6.tolerance_below = 3.14
+        joint_constraint6.weight = 1.0
+
+        joint_constraint_list = [joint_constraint, joint_constraint2, joint_constraint3, joint_constraint5, joint_constraint6]
 
         constraint_list = moveit_msgs.msg.Constraints()
         constraint_list.name = 'middle_of_travel'
@@ -406,8 +422,6 @@ class RosPlanner:
                     self.feedback_msg.feedback.currentPath = self.executing_boxid
                     self.action_server.publish_feedback(self.feedback_msg.feedback)
                     # print("Feedbacking")
-            else:
-                print("Havent implemented replanning yet")
 
             my_rate.sleep()
 
@@ -446,29 +460,37 @@ class RosPlanner:
 
             self.group.clear_pose_targets()
 
-            try:
+            #try:
 
-                # print("Planning")
-                for id, box in enumerate(self.boxes):
-                    if id != 0:
-                        if self.boxes[id - 1].goto_plan is not None:
-                            if len(self.boxes[id - 1].goto_plan.joint_trajectory.points) == 0:
-                                continue
-                            previouse_pose = self.robot.get_current_state()
-                            previouse_pose.joint_state.name = self.boxes[id - 1].goto_plan.joint_trajectory.joint_names
-                            previouse_pose.joint_state.position = self.boxes[id - 1].goto_plan.joint_trajectory.points[
-                                -1].positions
-                            box.update_previouse_pose(previouse_pose)
-                            if box.goto_plan is None:
-                                box.calculate_plans()
-                    else:
+            # print("Planning")
+            for id, box in enumerate(self.boxes):
+                if id != 0:
+                    if self.boxes[id - 1].goto_plan is not None:
+                        if len(self.boxes[id - 1].goto_plan.joint_trajectory.points) == 0:
+                            continue
+                        previouse_pose = self.robot.get_current_state()
+                        previouse_pose.joint_state.name = self.boxes[id - 1].goto_plan.joint_trajectory.joint_names
+                        previouse_pose.joint_state.position = self.boxes[id - 1].goto_plan.joint_trajectory.points[
+                            -1].positions
+                        box.update_previouse_pose(previouse_pose)
                         if box.goto_plan is None:
+                            if len(self.boxes) > id + 1 and self.boxes[id + 1].goto_plan is not None:
+                                box.calculate_plans(self.boxes[id+1].goto_plan)
+                            else:
+                                box.calculate_plans()
+                else:
+                    if box.goto_plan is None:
+                        box.update_previouse_pose(self.starting_pose)
+                        if len(self.boxes) > id + 1 and self.boxes[id + 1].goto_plan is not None:
+                            box.calculate_plans(self.boxes[id+1].goto_plan)
+                        else:
                             box.calculate_plans()
 
+                if len(self.boxes) > 0:
                     if self.boxes[-1].last_box_plan is None:
                         self.boxes[-1].last_box(self.starting_pose)
-            except Exception as e:
-                print(e)
+            #except Exception as e:
+            #    print(e)
 
             self.update_visualizer()
 
@@ -479,10 +501,10 @@ class RosPlanner:
         if msg.type.data == "delete":
             self.boxes.pop(msg.boxid)
             self.replan = True
-            print("Got delete", msg.boxid)
-            # if len(self.boxes) > msg.boxid + 1:
-            #     previouse_pose.joint_state.position = self.boxes[msg.boxid - 1].goto_plan.joint_trajectory.points[-1].positions
-            #     self.boxes[msg.boxid].update_previouse_pose(previouse_pose)
+            #print("Got delete", msg.boxid)
+            if len(self.boxes) > msg.boxid:
+                print("Deleting goto plan", msg.boxid)
+                self.boxes[msg.boxid].goto_plan = None
             return
 
         if msg.boxid == len(self.boxes):
