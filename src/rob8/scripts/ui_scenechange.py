@@ -46,7 +46,7 @@ class App(tk.Tk):
         goal.goal.runpath = True
         print(goal)
         self.client.send_goal(goal.goal)
-        self.client.wait_for_result(timeout=60)
+        self.client.wait_for_result(timeout=rospy.Time(60))
         print(self.client.get_result())
 
     def incoming_status(self, msg):

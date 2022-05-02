@@ -35,6 +35,19 @@ def talker():
     rospy.loginfo(new_box)
     pub.publish(new_box)
 
+    new_box = rob8.msg.Boxes()
+    new_box.boxid = 2
+    new_box.pose.position.x = -0.2
+    new_box.pose.position.y = 0.5
+    new_box.pose.position.z = 0.2
+    new_box.scalex = 0.2
+    new_box.scaley = 0.2
+    new_box.scalez = 0.1
+    new_box.pose.orientation.w = 1
+    new_box.type.data = "waypoint"
+    rospy.loginfo(new_box)
+    pub.publish(new_box)
+
     # time.sleep(30)
 
     # client = actionlib.SimpleActionClient('planner_give_executer', rob8.msg.ExecutespecificAction)
