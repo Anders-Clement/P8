@@ -32,29 +32,73 @@ def calculateMovements(positionLogs: 'list[PositionLog]') -> 'tuple[Position, Po
             lastMovementRotation =  nextRot
 
     return totalHeadMovement, totalHeadRotation
-            
+
+
+def sumObjectsLookedAt(scene: Scene, output: 'dict[str,int]' = dict()) -> 'dict[str, int]':
+    output = {}
+
+    for positionLog in scene.positionLogs:
+        if positionLog.targetName in output:
+            output[positionLog.targetName] += 1
+        else:
+            output[positionLog.targetName] = 1
+    
+    return output
+
 
 def calcSceneStatistics(scene: Scene) -> SceneStatistic:
     totalHeadMovement, totalHeadRotation = calculateMovements(scene.positionLogs)
-    return SceneStatistic(totalHeadMovement, totalHeadRotation)
+    objectsLookedAt = sumObjectsLookedAt(scene)
+    startTime = scene.positionLogs[0].time
+    endTime = scene.positionLogs[-1].time
+    duration = float(endTime) - float(startTime)
+    numNearInteractions = 0
+    numFarInteractions = 0
 
+    for functionLog in scene.functionLogs:
+        if "ManipulationStarted" in functionLog.functionName:
+            if functionLog.additionalData[4] == 'True':
+                numNearInteractions += 1
+            else:
+                numFarInteractions += 1
 
-def calcStatistics(trial: Trial):
+    numInteractions = numNearInteractions + numFarInteractions
+    return SceneStatistic(totalHeadMovement, totalHeadRotation, objectsLookedAt, 
+                            duration, numNearInteractions, numFarInteractions, numInteractions
+                        )
+   
+
+def calcTrialStatistics(trial: Trial) -> TrialStatistic:
+    totalDuration = 0
+    totalNearInteractions = 0
+    totalFarInteractions = 0
     for scene in trial.scenes:
-        scene.sceneStatistic = calcSceneStatistics(scene)
+        totalDuration += scene.sceneStatistic.duration
+        totalNearInteractions += scene.sceneStatistic.numNearInteractions
+        totalFarInteractions += scene.sceneStatistic.numFarInteractions
+
+    totalInteractions = totalNearInteractions + totalFarInteractions
+    statistic = TrialStatistic(totalInteractions, totalNearInteractions,
+                                 totalFarInteractions, totalDuration)
+    return statistic
 
 
 def calculateStatisticsOnTrials(trials: 'list[Trial]') -> None:
     for trial in trials:
-        calcStatistics(trial)
+        for scene in trial.scenes:
+            scene.sceneStatistic = calcSceneStatistics(scene)
+        trial.trialStatistic = calcTrialStatistics(trial)
+
 
 if __name__ == '__main__':
     from import_hololens_log import importLogFolderToTrials
-    logFolder = "C:\\Users\\ander\\Desktop\\LOGS_HOLOLENS" 
-    trials = importLogFolderToTrials(logFolder)
+    logFolder = "C:\\Users\\ander\\Desktop\\final_logs_2d" 
+    trials = importLogFolderToTrials(logFolder, prunePlayScene=True)
 
     calculateStatisticsOnTrials(trials)
     for trial in trials:
+        print(trial.fileName)
         for scene in trial.scenes:
-            print(scene.name, scene.sceneStatistic.totalHeadMovement, scene.sceneStatistic.totalHeadRotation)
-        print()
+            print(scene.name, scene.sceneStatistic)
+            print()
+        print("===============================================")
