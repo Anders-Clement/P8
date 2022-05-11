@@ -187,7 +187,7 @@ class display_object:
             self.move_group_ref.set_start_state_to_current_state()
             waypoints = []
             new_pose = copy.deepcopy(self.pose_above_box)
-            new_pose.position.z = new_pose.position.z - (self.scale.z / 2.0)
+            new_pose.position.z = new_pose.position.z - (self.scale[2] / 2.0)
             waypoints.append(copy.deepcopy(new_pose))
             (plan1, fraction) = self.move_group_ref.compute_cartesian_path(
                 waypoints,  # waypoints to follow

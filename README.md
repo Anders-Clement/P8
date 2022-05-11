@@ -34,8 +34,8 @@ $ source devel/setup.bash
 ## Running UR10 simulation in gazebo
 build, source and run in two terminals:
 ```
-roslaunch rob8 ur10_bringup.launch
-roslaunch rob8 ur10_controllers.launch
+roslaunch rob8 ur10_bringup_sim.launch
+roslaunch rob8 ur10_controllers_sim.launch
 ```
 
 ## Install ros driver for Astra camera
@@ -55,3 +55,14 @@ $ catkin_make
 $ roslaunch astra_camera astra.launch
 ```
 
+## Running the ROS system physically
+Configure your network to 192.168.x.1
+
+Load the rob8 program on the UR10, or make a program with the URcap
+
+```
+roslaunch rob8 ur10_bringup_physical.launch
+roslaunch rob8 ur10_controllers_physical.launch
+```
+
+then run the programing on the teaching pendant of the robot
