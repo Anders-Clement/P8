@@ -53,9 +53,9 @@ class PositionLog:
                     "SpawnPlace", "SpawnPick", "Sequencing", "SpawnWP"]
 
         if "_v" in hitName:
-            hitName = "robot_v"
+            hitName = "Robot_v"
         elif "_link" in hitName:
-            hitName = "robot"
+            hitName = "Robot"
         elif "shelf" in hitName:
             hitName = "shelf"
         # elif "Box" in hitName:

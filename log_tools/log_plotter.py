@@ -87,44 +87,31 @@ def sumOverTrialsObjectsLookedAt(trials: 'list[Trial]', sort: bool = True, plot 
 
 
 def plotInteractionsPerTask(trials: 'list[Trial]', useMedian=False) -> None:
-    """Makes a plot of the summed number of far/near interactions per task"""
+    """Makes a plot of the total number of far/near interactions per task"""
+    # extract the data
+    nearInteractions = [[],[],[]]
+    farInteractions = [[],[],[]]
+    for trial in trials:
+        for scene in trial.scenes:
+            if 'task_0' in scene.name:
+                index = 0
+            elif 'task_1' in scene.name:
+                index = 1
+            elif 'task_2' in scene.name:
+                index = 2
+            else:
+                print("Unknown scene name! skipping...")
+                continue
+                
+            nearInteractions[index].append(scene.sceneStatistic.numNearInteractions)
+            farInteractions[index].append(scene.sceneStatistic.numFarInteractions)
+
     if useMedian:
-        nearInteractions = [[],[],[]]
-        farInteractions = [[],[],[]]
-        for trial in trials:
-            for scene in trial.scenes:
-                if 'task_0' in scene.name:
-                    index = 0
-                elif 'task_1' in scene.name:
-                    index = 1
-                elif 'task_2' in scene.name:
-                    index = 2
-                else:
-                    print("Unknown scene name! skipping...")
-                    continue
-                    
-                nearInteractions[index].append(scene.sceneStatistic.numNearInteractions)
-                farInteractions[index].append(scene.sceneStatistic.numFarInteractions)
         nearInteractions = np.median(np.array(nearInteractions),axis=1)
         farInteractions = np.median(np.array(farInteractions), axis=1)
     else:
-        nearInteractions = [0,0,0]
-        farInteractions = [0,0,0]
-
-        for trial in trials:
-            for scene in trial.scenes:
-                if 'task_0' in scene.name:
-                    index = 0
-                elif 'task_1' in scene.name:
-                    index = 1
-                elif 'task_2' in scene.name:
-                    index = 2
-                else:
-                    print("Unknown scene name! skipping...")
-                    continue
-                    
-                nearInteractions[index] += scene.sceneStatistic.numNearInteractions
-                farInteractions[index] += scene.sceneStatistic.numFarInteractions
+        nearInteractions = np.sum(np.array(nearInteractions),axis=1)
+        farInteractions = np.sum(np.array(farInteractions), axis=1)
 
     N = 3
     # menMeans = (20, 35, 30, 35, 27)
@@ -146,7 +133,7 @@ def plotInteractionsPerTask(trials: 'list[Trial]', useMedian=False) -> None:
     if useMedian:
         title = "Median number of far/near interactions per task"
     else:
-        title='Summed number of far/near interactions per task'
+        title='Total number of far/near interactions per task'
     fig.suptitle(title, fontsize=16)
     if useMedian:
         fig.savefig('plotInteractionsPerTaskMedian.pdf')
@@ -155,7 +142,7 @@ def plotInteractionsPerTask(trials: 'list[Trial]', useMedian=False) -> None:
 
 
 def plotInteractionsPerUser(trials: 'list[Trial]') -> None:
-    """Makes a plot of the summed number of far/near interactions per user over all tasks"""
+    """Makes a plot of the total number of far/near interactions per user over all tasks"""
     nearInteractions = []
     farInteractions = []
     for trial in trials:
@@ -231,25 +218,51 @@ def plotObjectsLookedAtPerTask(trials: 'list[Trial]') -> None:
             if "task_2" in scene.name:
                 task_2_objects = sumObjectsLookedAt(scene, task_2_objects)
 
-    task_0_objects = dict(sorted(task_0_objects.items(), key=lambda item: item[1]))
-    task_1_objects = dict(sorted(task_1_objects.items(), key=lambda item: item[1]))
-    task_2_objects = dict(sorted(task_2_objects.items(), key=lambda item: item[1]))
+    # ensure all keys are in all dicts, to plot them as a zero
+    for value in task_0_objects.keys():
+        if value not in task_1_objects.keys():
+            task_1_objects[value] = 0
+        if value not in task_2_objects.keys():
+            task_2_objects[value] = 0
+
+    for value in task_1_objects.keys():
+        if value not in task_0_objects.keys():
+            task_0_objects[value] = 0
+        if value not in task_2_objects.keys():
+            task_2_objects[value] = 0
+
+    for value in task_2_objects.keys():
+        if value not in task_1_objects.keys():
+            task_1_objects[value] = 0
+        if value not in task_0_objects.keys():
+            task_0_objects[value] = 0
+
+    # sort to ensure order
+    task_0_objects = dict(sorted(task_0_objects.items(), key=lambda item: task_0_objects[item[0]]))
+    task_1_objects = dict(sorted(task_1_objects.items(), key=lambda item: task_0_objects[item[0]]))
+    task_2_objects = dict(sorted(task_2_objects.items(), key=lambda item: task_0_objects[item[0]]))
     
-    fig, ax = plt.subplots(3)
-    ax[0].bar(range(len(task_0_objects)), list(task_0_objects.values()), tick_label=list(task_0_objects.keys()))
-    ax[1].bar(range(len(task_1_objects)), list(task_1_objects.values()), tick_label=list(task_1_objects.keys()))
-    ax[2].bar(range(len(task_2_objects)), list(task_2_objects.values()), tick_label=list(task_2_objects.keys()))
-    for i in range(3):
-        ax[i].set_title('Task ' + str(i+1), x=0.5, y=0.7)
-        ax[i].set_ylim((0,1000))
-    ax[1].set_ylabel('Number of observations')
+    N = len(task_0_objects)
+    width = .35
+
+    fig, ax = plt.subplots(1)
+    ind = np.arange(N) - width
+    ind = [x + i*width for i, x in enumerate(ind)]
+    ind2 = [x + width for x in ind]
+    ind3 = [x + width for x in ind2]
+    ax.bar(ind, list(task_0_objects.values()), width)
+    ax.bar(ind2, list(task_1_objects.values()), width, tick_label=list(task_0_objects.keys()))
+    ax.bar(ind3, list(task_2_objects.values()), width)
+    ax.set_ylim((0,1000))
+    ax.set_ylabel('Number of observations')
+    ax.legend(['Task 1', 'Task 2', 'Task 3'])
     fig.suptitle('Objects seen by the participants', fontsize=16)
     fig.tight_layout()
     fig.savefig('plotObjectsLookedAtPerTask.pdf')
 
 
 def getDurationsOfTasks(trials: 'list[Trial]') -> 'tuple[list[float], list[float], list[float]]':
-    """Extracts the summed durations of each task over all trials"""
+    """Extracts the total durations of each task over all trials"""
     task_0_durations = []
     task_1_durations = []
     task_2_durations = []
@@ -275,6 +288,7 @@ def taskDurationStatistics(trials: 'list[Trial]'):
         print(durationOfTasks[i][:-2])
         print('median: ', durationOfTasks[i][-2])
         print('average: ', durationOfTasks[i][-1])
+        print('sum: ', np.sum(durationOfTasks[i][:-2]))
     print('==== // Duration Statistics ====')
     data = np.array(durationOfTasks)
     np.savetxt('taskDuration.csv', data, header="durations; median; average; from top: task_0 to task_2", delimiter=';')
@@ -312,10 +326,10 @@ def getDurationOfInteractions(trials: 'list[Trial]') -> 'None | list[list[list[f
                         else:
                             farInteractionStartTime = log.time
                     elif "ManipulationEnded" in log.functionName:
-                        if 'True' in log.additionalData[4]:
-                            nearInteractions.append(log.time - nearInteractionStartTime)
-                        else:
-                            farInteractions.append(log.time - farInteractionStartTime)
+                            if 'True' in log.additionalData[4]:
+                                nearInteractions.append(log.time - nearInteractionStartTime)
+                            else:
+                                farInteractions.append(log.time - farInteractionStartTime)
 
                 taskNearInteractions.append(nearInteractions)
                 taskFarInteractions.append(farInteractions)
@@ -350,16 +364,18 @@ def plotDurationOfInteractionsPerTask(trials: 'list[Trial]', useMedian=False):
     N = 3
     # menMeans = (20, 35, 30, 35, 27)
     # womenMeans = (25, 32, 34, 20, 25)
-    ind = np.arange(N) +1 # the x locations for the groups
+
     width = 0.35
+    ind = np.arange(N) + 1 +width/2.0 # the x locations for the groups
+    ind2 = [x + width for x in ind]
     fig, ax = plt.subplots(1)
     #ax = fig.add_axes([0,0,1,1])
     ax.bar(ind, near, width, color='r')
-    ax.bar(ind, far, width,bottom=near, color='b')
+    ax.bar(ind2, far, width, color='b')
     ax.set_ylabel('[s]')
     #ax.set_xlabel('Task')
     #ax.set_title('Scores by group and gender')
-    ax.set_xticks(ind) #, labels=['Task 1', 'Task 2', 'Task 3'])
+    ax.set_xticks([x + width/2.0 for x in ind]) #, labels=['Task 1', 'Task 2', 'Task 3'])
     ax.set_xticklabels(['Task 1', 'Task 2', 'Task 3'])
     # if not useMedian:
     #     ax.set_yticks(np.arange(0, 175, 20))
@@ -367,7 +383,7 @@ def plotDurationOfInteractionsPerTask(trials: 'list[Trial]', useMedian=False):
     if useMedian:
         title = "Median duration of far/near interactions per task"
     else:
-        title='Summed duration of far/near interactions per task'
+        title='Total duration of far/near interactions per task'
     fig.suptitle(title, fontsize=16)
     if useMedian:
         fig.savefig('plotDurationOfInteractionsPerTaskMedian.pdf')
@@ -379,7 +395,7 @@ def updateAllPlots(trials: 'list[Trial]', show: bool = False) -> None:
     durationOfTasks = taskDurationStatistics(trials)
     plotDurationOfTasks(durationOfTasks)
 
-    # plot summed near/far interaction per user, as well as using median/average per task
+    # plot total near/far interaction per user, as well as using median/average per task
     plotInteractionsPerUser(trials)
     plotInteractionsPerTask(trials)
     plotInteractionsPerTask(trials, useMedian=True)
@@ -400,6 +416,7 @@ if __name__ == '__main__':
     [trial.convertBoxNameToBoxType() for trial in trials]
 
     calculateStatisticsOnTrials(trials)
+    print(taskDurationStatistics(trials))
 
     updateAllPlots(trials, show=False)
 
