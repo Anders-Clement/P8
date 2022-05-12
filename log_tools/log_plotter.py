@@ -219,28 +219,30 @@ def plotObjectsLookedAtPerTask(trials: 'list[Trial]') -> None:
                 task_2_objects = sumObjectsLookedAt(scene, task_2_objects)
 
     # ensure all keys are in all dicts, to plot them as a zero
-    for value in task_0_objects.keys():
-        if value not in task_1_objects.keys():
-            task_1_objects[value] = 0
-        if value not in task_2_objects.keys():
-            task_2_objects[value] = 0
+    for key in task_0_objects.keys():
+        if key not in task_1_objects.keys():
+            task_1_objects[key] = 0
+        if key not in task_2_objects.keys():
+            task_2_objects[key] = 0
 
-    for value in task_1_objects.keys():
-        if value not in task_0_objects.keys():
-            task_0_objects[value] = 0
-        if value not in task_2_objects.keys():
-            task_2_objects[value] = 0
+    for key in task_1_objects.keys():
+        if key not in task_0_objects.keys():
+            task_0_objects[key] = 0
+        if key not in task_2_objects.keys():
+            task_2_objects[key] = 0
 
-    for value in task_2_objects.keys():
-        if value not in task_1_objects.keys():
-            task_1_objects[value] = 0
-        if value not in task_0_objects.keys():
-            task_0_objects[value] = 0
+    for key in task_2_objects.keys():
+        if key not in task_1_objects.keys():
+            task_1_objects[key] = 0
+        if key not in task_0_objects.keys():
+            task_0_objects[key] = 0
 
-    # sort to ensure order
-    task_0_objects = dict(sorted(task_0_objects.items(), key=lambda item: task_0_objects[item[0]]))
-    task_1_objects = dict(sorted(task_1_objects.items(), key=lambda item: task_0_objects[item[0]]))
-    task_2_objects = dict(sorted(task_2_objects.items(), key=lambda item: task_0_objects[item[0]]))
+
+    # sort by maximum value over tasks
+    # sortKeyFunc = lambda item: max(task_0_objects[item[0]],task_1_objects[item[0]], task_2_objects[item[0]])
+    # sort by maximum value of task 1
+    sortKeyFunc = lambda item: item[1]
+    task_0_objects = dict(sorted(task_0_objects.items(), key=sortKeyFunc))
     
     N = len(task_0_objects)
     width = .35
@@ -250,9 +252,14 @@ def plotObjectsLookedAtPerTask(trials: 'list[Trial]') -> None:
     ind = [x + i*width for i, x in enumerate(ind)]
     ind2 = [x + width for x in ind]
     ind3 = [x + width for x in ind2]
-    ax.bar(ind, list(task_0_objects.values()), width)
-    ax.bar(ind2, list(task_1_objects.values()), width, tick_label=list(task_0_objects.keys()))
-    ax.bar(ind3, list(task_2_objects.values()), width)
+
+    task1 = [task_0_objects[key] for key in task_0_objects.keys()]
+    task2 = [task_1_objects[key] for key in task_0_objects.keys()]
+    task3 = [task_2_objects[key] for key in task_0_objects.keys()]
+    
+    ax.bar(ind, task1, width)
+    ax.bar(ind2, task2, width, tick_label=list(task_0_objects.keys()))
+    ax.bar(ind3, task3, width)
     ax.set_ylim((0,1000))
     ax.set_ylabel('Number of observations')
     ax.legend(['Task 1', 'Task 2', 'Task 3'])
