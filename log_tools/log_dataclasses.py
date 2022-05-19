@@ -47,27 +47,28 @@ class PositionLog:
         self.time = float(fields[0])
         self.hololensPosition = Position(fields[1])
         self.hololensOrientation = Position(fields[2])
+
         hitName = fields[3]
-        
         UINames = ["corner", "ContentBackPlate", "Delete", 
-                    "SpawnPlace", "SpawnPick", "Sequencing", "SpawnWP"]
+                    "SpawnPlace", "SpawnPick", "Sequencing", "SpawnWP",
+                    "metal_shelf", "placePrefab", "pickPrefab", "waypointPrefab",
+                    "Waypoint", "Pick", "Place"]
 
         if "_v" in hitName:
             hitName = "Robot_v"
         elif "_link" in hitName:
             hitName = "Robot"
-        elif "shelf" in hitName:
-            hitName = "shelf"
-        # elif "Box" in hitName:
-        #     hitName = "Box"
         elif "knuckle" in hitName or "finger" in hitName:
             hitName = "Gripper"
         elif "SpatialMesh" in hitName:
             hitName = "BG"
         elif "Background" in hitName:
             hitName = "BG"
+        elif "Trash" in hitName:
+            hitName = "Trash"
         elif True in [name in hitName for name in UINames]:
             hitName = "UI"
+
         
 
         self.targetName = hitName
@@ -179,7 +180,10 @@ class Trial:
         boxes = {}
         for scene in self.scenes:
             for functionLog in scene.functionLogs:
-                if "Spawn" in functionLog.functionName:
+                if "SpawnBoxOnShelf" in functionLog.functionName:
+                    boxName = functionLog.additionalData[0]
+                    boxes[len(boxes)] = boxName
+                elif "Spawn" in functionLog.functionName:
                     boxName = functionLog.functionName[5:] # trim the 'Spawn'
 
                     # trim the rest:

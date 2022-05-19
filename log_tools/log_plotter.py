@@ -1,9 +1,7 @@
-from tracemalloc import start
-from unicodedata import numeric
 import matplotlib.pyplot as plt
 import numpy as np
 from import_hololens_log import importLogFolderToTrials
-from log_dataclasses import FunctionLog, Position, PositionLog, Scene, Trial
+from log_dataclasses import PositionLog, Scene, Trial
 from calc_statistics import sumObjectsLookedAt, calculateStatisticsOnTrials
 
 
@@ -116,16 +114,18 @@ def plotInteractionsPerTask(trials: 'list[Trial]', useMedian=False) -> None:
     N = 3
     # menMeans = (20, 35, 30, 35, 27)
     # womenMeans = (25, 32, 34, 20, 25)
-    ind = np.arange(N) +1 # the x locations for the groups
     width = 0.35
+    ind = np.arange(N) + 1 # the x locations for the groups
+    ind2 = [x + width for x in ind]
+
     fig, ax = plt.subplots(1)
     #ax = fig.add_axes([0,0,1,1])
     ax.bar(ind, nearInteractions, width, color='r')
-    ax.bar(ind, farInteractions, width,bottom=nearInteractions, color='b')
+    ax.bar(ind2, farInteractions, width, color='b')
     ax.set_ylabel('Number of interactions')
     #ax.set_xlabel('Task')
     #ax.set_title('Scores by group and gender')
-    ax.set_xticks(ind) #, labels=['Task 1', 'Task 2', 'Task 3'])
+    ax.set_xticks([x + width/2.0 for x in ind]) #, labels=['Task 1', 'Task 2', 'Task 3'])
     ax.set_xticklabels(['Task 1', 'Task 2', 'Task 3'])
     if not useMedian:
         ax.set_yticks(np.arange(0, 175, 20))
@@ -135,10 +135,11 @@ def plotInteractionsPerTask(trials: 'list[Trial]', useMedian=False) -> None:
     else:
         title='Total number of far/near interactions per task'
     fig.suptitle(title, fontsize=16)
+    global logFolder
     if useMedian:
-        fig.savefig('plotInteractionsPerTaskMedian.pdf')
+        fig.savefig(logFolder + '\\plotInteractionsPerTaskMedian.pdf')
     else:
-        fig.savefig('plotInteractionsPerTask.pdf')
+        fig.savefig(logFolder + '\\plotInteractionsPerTask.pdf')
 
 
 def plotInteractionsPerUser(trials: 'list[Trial]') -> None:
@@ -162,7 +163,8 @@ def plotInteractionsPerUser(trials: 'list[Trial]') -> None:
     ax.set_yticks(np.arange(0, 100, 10))
     ax.legend(labels=['Near interaction', 'Far interaction'])
     fig.suptitle('Far/near interaction per user over all tasks', fontsize=16)
-    fig.savefig('plotInteractionsPerUser.pdf')
+    global logFolder
+    fig.savefig(logFolder + '\\plotInteractionsPerUser.pdf')
     
 
 def checkIfAlwaysOneHandInteraction(trials: 'list[Trial]') -> bool:
@@ -265,7 +267,8 @@ def plotObjectsLookedAtPerTask(trials: 'list[Trial]') -> None:
     ax.legend(['Task 1', 'Task 2', 'Task 3'])
     fig.suptitle('Objects seen by the participants', fontsize=16)
     fig.tight_layout()
-    fig.savefig('plotObjectsLookedAtPerTask.pdf')
+    global logFolder
+    fig.savefig(logFolder + '\\plotObjectsLookedAtPerTask.pdf')
 
 
 def getDurationsOfTasks(trials: 'list[Trial]') -> 'tuple[list[float], list[float], list[float]]':
@@ -309,7 +312,8 @@ def plotDurationOfTasks(durations: 'list[float]'):
     ax.bar([1,2,3], data, width=.35, tick_label=["Task 1", "Task 2", "Task 3"])
     ax.set_ylabel('[s]')
     fig.suptitle('Average duration of tasks', fontsize=16)
-    fig.savefig('plotDurationOfTasks.pdf')
+    global logFolder
+    fig.savefig(logFolder + '\\plotDurationOfTasks.pdf')
 
 
 def getDurationOfInteractions(trials: 'list[Trial]') -> 'None | list[list[list[float]]]':
@@ -326,17 +330,43 @@ def getDurationOfInteractions(trials: 'list[Trial]') -> 'None | list[list[list[f
             for scene in trial.scenes:
                 nearInteractions = []
                 farInteractions = []
+                manipulating = ""
+                manipulationType = ""
                 for log in scene.functionLogs:
                     if "ManipulationStarted" in log.functionName:
+                        if manipulating is not "":
+                            print("Got manipulation started, but am already manipulating!")
+                        else:
+                            manipulating = log.additionalData[1]
                         if 'True' in log.additionalData[4]:
                             nearInteractionStartTime = log.time
+                            manipulationType = "Near"
                         else:
                             farInteractionStartTime = log.time
+                            manipulationType = "Far"
                     elif "ManipulationEnded" in log.functionName:
-                            if 'True' in log.additionalData[4]:
-                                nearInteractions.append(log.time - nearInteractionStartTime)
+                            if manipulating is "":
+                                print("Got manipulationEnded, but am not manipulating")
+                            if log.additionalData[1] is manipulating:
+                                manipulating = ""
+                                if 'True' in log.additionalData[4]:
+                                    nearInteractions.append(log.time - nearInteractionStartTime)
+                                else:
+                                    farInteractions.append(log.time - farInteractionStartTime)
                             else:
+                                print("ended manipulation on something else than manipulation started on")
+                            
+                    elif "DeleteBox" in log.functionName:
+                        if manipulating is not "":
+                            if manipulationType is "Near":
+                                nearInteractions.append(log.time - nearInteractionStartTime)
+                            elif manipulationType is "Far":
                                 farInteractions.append(log.time - farInteractionStartTime)
+                            else:
+                                print("unknown manipulation type?")
+
+                    
+                    
 
                 taskNearInteractions.append(nearInteractions)
                 taskFarInteractions.append(farInteractions)
@@ -392,12 +422,38 @@ def plotDurationOfInteractionsPerTask(trials: 'list[Trial]', useMedian=False):
     else:
         title='Total duration of far/near interactions per task'
     fig.suptitle(title, fontsize=16)
+    global logFolder
     if useMedian:
-        fig.savefig('plotDurationOfInteractionsPerTaskMedian.pdf')
+        fig.savefig(logFolder + '\\plotDurationOfInteractionsPerTaskMedian.pdf')
     else:
-        fig.savefig('plotDurationOfInteractionsPerTask.pdf')
+        fig.savefig(logFolder + '\\plotDurationOfInteractionsPerTask.pdf')
 
-    
+
+def checkSampleRate(trials: 'list[Trial]') -> None:
+    # checking on sample rate,
+    allSampletimes = [] 
+    for trial in trials:
+        sampleTimes = []
+        for scene in trial.scenes:
+            if "task_" in scene.name:
+                for i in range(len(scene.positionLogs)):
+                    if i == 0:
+                        continue
+                    sampleTimes.append(scene.positionLogs[i].time - scene.positionLogs[i-1].time)
+        allSampletimes += sampleTimes
+        # per trial sample times
+        # startTime = trial.scenes[0].positionLogs[0].time
+        # endTime = trial.scenes[-1].positionLogs[-1].time
+        # duration = endTime-startTime
+        # sampleRateAvg = np.average(sampleTimes)
+        # sampleRateSTD = np.std(sampleTimes)
+        # print(trial.folderName, 'Duration: ', duration, ', Sample rate mean: ', sampleRateAvg, ', Sample rate std.dev: ', sampleRateSTD)
+
+    sampleRateAvgALL = np.average(np.array(allSampletimes))
+    sampleRateSTDALL = np.std(np.array(allSampletimes))
+    print(f"For all trials, sample rate mean: {sampleRateAvgALL}, sample rate std.dev: {sampleRateSTDALL}")
+
+
 def updateAllPlots(trials: 'list[Trial]', show: bool = False) -> None:
     durationOfTasks = taskDurationStatistics(trials)
     plotDurationOfTasks(durationOfTasks)
@@ -409,31 +465,31 @@ def updateAllPlots(trials: 'list[Trial]', show: bool = False) -> None:
 
     plotObjectsLookedAtPerTask(trials)
 
-    plotDurationOfInteractionsPerTask(trials)
-    plotDurationOfInteractionsPerTask(trials, True)
+    # these two only works for 2D fixed ui scene, and not the shelf scene
+    # this is due to how interactions start and end from the shelf, 
+    # where both name and id are changed during the manipulation, making it impossible 
+    # with currenty Unity implementation to check if it is the same box. 
+    # plotDurationOfInteractionsPerTask(trials)
+    # plotDurationOfInteractionsPerTask(trials, True)
 
     if show:
         plt.show()
 
 
 if __name__ == '__main__':
-    logFolder = "C:\\Users\\ander\\Desktop\\final_logs_2d" 
+    # first trials with the fixed UI:
+    # logFolder = "C:\\Users\\ander\\Desktop\\final_logs_2d" 
+    # test folder with improved shelf scene:
+    global logFolder
+    logFolder = "C:\\Users\\ander\\Desktop\\final_logs\\final_shelf_logs" 
     trials = importLogFolderToTrials(logFolder, prunePlayScene=True)
     trials = sorted(trials, key=lambda item: item.folderName)
-    [trial.convertBoxNameToBoxType() for trial in trials]
+    for trial in trials: trial.convertBoxNameToBoxType()
 
     calculateStatisticsOnTrials(trials)
     print(taskDurationStatistics(trials))
-
     updateAllPlots(trials, show=False)
 
-    # checking on sample rate
-    # for trial in trials:
-    #     startTime = trial.scenes[0].positionLogs[0].time
-    #     endTime = trial.scenes[-1].positionLogs[-1].time
-        
-    #     totalNumSamples = np.sum([len(scene.positionLogs) for scene in trial.scenes])
+    checkSampleRate(trials)
 
-    #     duration = endTime-startTime
-    #     sampleRate = totalNumSamples/duration
-    #     print(trial.folderName, 'Duration: ', duration, ', Sample rate: ', sampleRate)
+    

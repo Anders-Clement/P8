@@ -40,7 +40,8 @@ def importLogFolderToTrials(logFolder: str, prunePlayScene: bool = True) -> 'lis
     list_of_files = []
     for root, dirs, files in os.walk(logFolder):
         for file in files:
-            list_of_files.append([os.path.join(root,file), root])
+            if ".csv" in file[-4:]:
+                list_of_files.append([os.path.join(root,file), root])
 
     trials: 'list[Trial]' = []
     for logFile in list_of_files:
@@ -49,6 +50,6 @@ def importLogFolderToTrials(logFolder: str, prunePlayScene: bool = True) -> 'lis
 
     if prunePlayScene:
         for trial in trials:
-            trial.scenes = [scene for scene in trial.scenes if 'finalPlayscene' not in scene.name]
+            trial.scenes = [scene for scene in trial.scenes if 'finalPlayscene' not in scene.name and 'ShelfPlayScene' not in scene.name]
 
     return trials
