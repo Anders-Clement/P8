@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from import_hololens_log import importLogFolderToTrials
-from log_dataclasses import PositionLog, Scene, Trial
+from log_dataclasses import PositionLog, Scene, Trial, Position
 from calc_statistics import sumObjectsLookedAt, calculateStatisticsOnTrials
 
 
@@ -84,7 +84,7 @@ def sumOverTrialsObjectsLookedAt(trials: 'list[Trial]', sort: bool = True, plot 
     return objectsLookedAt
 
 
-def plotInteractionsPerTask(trials: 'list[Trial]', useMedian=False) -> None:
+def plotInteractionsPerTask(trials: 'list[Trial]', title: str, useMedian=False) -> None:
     """Makes a plot of the total number of far/near interactions per task"""
     # extract the data
     nearInteractions = [[],[],[]]
@@ -122,19 +122,19 @@ def plotInteractionsPerTask(trials: 'list[Trial]', useMedian=False) -> None:
     #ax = fig.add_axes([0,0,1,1])
     ax.bar(ind, nearInteractions, width, color='r')
     ax.bar(ind2, farInteractions, width, color='b')
-    ax.set_ylabel('Number of interactions')
+
+    if useMedian:
+        ax.set_ylabel("Median number of interactions")
+    else:
+        ax.set_ylabel('Number of interactions')
     #ax.set_xlabel('Task')
     #ax.set_title('Scores by group and gender')
     ax.set_xticks([x + width/2.0 for x in ind]) #, labels=['Task 1', 'Task 2', 'Task 3'])
     ax.set_xticklabels(['Task 1', 'Task 2', 'Task 3'])
     if not useMedian:
-        ax.set_yticks(np.arange(0, 175, 20))
+        ax.set_yticks(np.arange(0, 121, 20))
     ax.legend(labels=['Near interaction', 'Far interaction'])
-    if useMedian:
-        title = "Median number of far/near interactions per task"
-    else:
-        title='Total number of far/near interactions per task'
-    fig.suptitle(title, fontsize=16)
+    fig.suptitle(title, fontsize=20)
     global logFolder
     if useMedian:
         fig.savefig(logFolder + '\\plotInteractionsPerTaskMedian.pdf')
@@ -142,7 +142,7 @@ def plotInteractionsPerTask(trials: 'list[Trial]', useMedian=False) -> None:
         fig.savefig(logFolder + '\\plotInteractionsPerTask.pdf')
 
 
-def plotInteractionsPerUser(trials: 'list[Trial]') -> None:
+def plotInteractionsPerUser(trials: 'list[Trial]', title: str) -> None:
     """Makes a plot of the total number of far/near interactions per user over all tasks"""
     nearInteractions = []
     farInteractions = []
@@ -160,9 +160,9 @@ def plotInteractionsPerUser(trials: 'list[Trial]') -> None:
     #ax.set_title('Scores by group and gender')
     ax.set_xticks(ind) #, labels=['Task 1', 'Task 2', 'Task 3'])
     #ax.set_xticklabels(['Task 1', 'Task 2', 'Task 3'])
-    ax.set_yticks(np.arange(0, 100, 10))
-    ax.legend(labels=['Near interaction', 'Far interaction'])
-    fig.suptitle('Far/near interaction per user over all tasks', fontsize=16)
+    ax.set_yticks(np.arange(0, 91, 10))
+    ax.legend(labels=['Near interaction', 'Far interaction'], loc="upper left")
+    fig.suptitle(title, fontsize=20)
     global logFolder
     fig.savefig(logFolder + '\\plotInteractionsPerUser.pdf')
     
@@ -206,7 +206,7 @@ def checkIfAlwaysOneHandInteraction(trials: 'list[Trial]') -> bool:
     return alwaysOneHanded
 
 
-def plotObjectsLookedAtPerTask(trials: 'list[Trial]') -> None:
+def plotObjectsLookedAtPerTask(trials: 'list[Trial]', title: str) -> None:
     """Bar chart of objects looked at, with a plot for each task."""
     task_0_objects = {}
     task_1_objects = {}
@@ -243,7 +243,9 @@ def plotObjectsLookedAtPerTask(trials: 'list[Trial]') -> None:
     # sort by maximum value over tasks
     # sortKeyFunc = lambda item: max(task_0_objects[item[0]],task_1_objects[item[0]], task_2_objects[item[0]])
     # sort by maximum value of task 1
-    sortKeyFunc = lambda item: item[1]
+    sortOrder = {"Robot": 0, "Robot_v": 1, "Gripper": 2, "UI": 3, "place": 4, "pick": 5, "waypoint": 6, 
+                "BG": 7, "Sequen.": 8, "Place": 4, "Pick": 5, "Waypoint": 6, "WP": 6}
+    sortKeyFunc = lambda item: sortOrder[item[0]]
     task_0_objects = dict(sorted(task_0_objects.items(), key=sortKeyFunc))
     
     N = len(task_0_objects)
@@ -255,17 +257,27 @@ def plotObjectsLookedAtPerTask(trials: 'list[Trial]') -> None:
     ind2 = [x + width for x in ind]
     ind3 = [x + width for x in ind2]
 
-    task1 = [task_0_objects[key] for key in task_0_objects.keys()]
-    task2 = [task_1_objects[key] for key in task_0_objects.keys()]
-    task3 = [task_2_objects[key] for key in task_0_objects.keys()]
-    
+    task_0_num_observations = 0
+    task_1_num_observations = 0
+    task_2_num_observations = 0
+    for obs in task_0_objects.keys(): task_0_num_observations += task_0_objects[obs]
+    for obs in task_1_objects.keys(): task_1_num_observations += task_1_objects[obs]
+    for obs in task_2_objects.keys(): task_2_num_observations += task_2_objects[obs]
+
+    task1 = [task_0_objects[key]/task_0_num_observations*100 for key in task_0_objects.keys()]
+    task2 = [task_1_objects[key]/task_1_num_observations*100 for key in task_0_objects.keys()]
+    task3 = [task_2_objects[key]/task_2_num_observations*100 for key in task_0_objects.keys()]
+    ticklabels = ["Robot", "TV", "Grip.", "UI", "Place", "Pick", "WP", "BG"]
+    if "Sequen." in task_0_objects.keys():
+        ticklabels.append("Seq.")
     ax.bar(ind, task1, width)
-    ax.bar(ind2, task2, width, tick_label=list(task_0_objects.keys()))
+    # ax.bar(ind2, task2, width, tick_label=list(task_0_objects.keys()))
+    ax.bar(ind2, task2, width, tick_label=ticklabels)
     ax.bar(ind3, task3, width)
-    ax.set_ylim((0,1000))
-    ax.set_ylabel('Number of observations')
+    ax.set_ylim((0,40))
+    ax.set_ylabel('Percentage of observations')
     ax.legend(['Task 1', 'Task 2', 'Task 3'])
-    fig.suptitle('Objects seen by the participants', fontsize=16)
+    fig.suptitle(title, fontsize=20)
     fig.tight_layout()
     global logFolder
     fig.savefig(logFolder + '\\plotObjectsLookedAtPerTask.pdf')
@@ -290,16 +302,16 @@ def getDurationsOfTasks(trials: 'list[Trial]') -> 'tuple[list[float], list[float
 def taskDurationStatistics(trials: 'list[Trial]'):
     """Calculates median and average completion time for each task"""
     durationOfTasks = getDurationsOfTasks(trials)
-    print("==== Duration Statistics ====")
+    # print("==== Duration Statistics ====")
     for i in range(3):
         durationOfTasks[i].append(np.median(np.array(durationOfTasks[i])))
         durationOfTasks[i].append(np.average(np.array(durationOfTasks[i])))
-        print("============== TASK " + str(i) + " ==============")
-        print(durationOfTasks[i][:-2])
-        print('median: ', durationOfTasks[i][-2])
-        print('average: ', durationOfTasks[i][-1])
-        print('sum: ', np.sum(durationOfTasks[i][:-2]))
-    print('==== // Duration Statistics ====')
+    #     print("============== TASK " + str(i) + " ==============")
+    #     print(durationOfTasks[i][:-2])
+    #     print('median: ', durationOfTasks[i][-2])
+    #     print('average: ', durationOfTasks[i][-1])
+    #     print('sum: ', np.sum(durationOfTasks[i][:-2]))
+    # print('==== // Duration Statistics ====')
     data = np.array(durationOfTasks)
     np.savetxt('taskDuration.csv', data, header="durations; median; average; from top: task_0 to task_2", delimiter=';')
     return durationOfTasks
@@ -309,9 +321,10 @@ def plotDurationOfTasks(durations: 'list[float]'):
     """Makes a bar plot of average duration over all participants for each task"""
     fig, ax = plt.subplots(1)
     data = np.array(durations)[:,-1]
+    print(data)
     ax.bar([1,2,3], data, width=.35, tick_label=["Task 1", "Task 2", "Task 3"])
     ax.set_ylabel('[s]')
-    fig.suptitle('Average duration of tasks', fontsize=16)
+    fig.suptitle('Average duration of tasks', fontsize=20)
     global logFolder
     fig.savefig(logFolder + '\\plotDurationOfTasks.pdf')
 
@@ -421,7 +434,7 @@ def plotDurationOfInteractionsPerTask(trials: 'list[Trial]', useMedian=False):
         title = "Median duration of far/near interactions per task"
     else:
         title='Total duration of far/near interactions per task'
-    fig.suptitle(title, fontsize=16)
+    fig.suptitle(title, fontsize=20)
     global logFolder
     if useMedian:
         fig.savefig(logFolder + '\\plotDurationOfInteractionsPerTaskMedian.pdf')
@@ -454,16 +467,33 @@ def checkSampleRate(trials: 'list[Trial]') -> None:
     print(f"For all trials, sample rate mean: {sampleRateAvgALL}, sample rate std.dev: {sampleRateSTDALL}")
 
 
-def updateAllPlots(trials: 'list[Trial]', show: bool = False) -> None:
+def importAndMakePlots(folder: str, title: str) -> None:
+    global logFolder
+    logFolder = folder
+    trials = importLogFolderToTrials(logFolder, prunePlayScene=True)
+    trials = sorted(trials, key=lambda item: item.folderName)
+    for trial in trials: trial.convertBoxNameToBoxType()
+
+    calculateStatisticsOnTrials(trials)
+    # print(taskDurationStatistics(trials))
     durationOfTasks = taskDurationStatistics(trials)
     plotDurationOfTasks(durationOfTasks)
 
     # plot total near/far interaction per user, as well as using median/average per task
-    plotInteractionsPerUser(trials)
-    plotInteractionsPerTask(trials)
-    plotInteractionsPerTask(trials, useMedian=True)
+    plotInteractionsPerUser(trials, title)
+    plotInteractionsPerTask(trials, title)
+    plotInteractionsPerTask(trials, title, useMedian=True)
 
-    plotObjectsLookedAtPerTask(trials)
+    plotObjectsLookedAtPerTask(trials, title)
+
+    totalMovement = Position.fromXYZ(0,0,0)
+    totalRotation = Position.fromXYZ(0,0,0)
+    for trial in trials:
+        totalMovement += trial.trialStatistic.totalMovement
+        totalRotation += trial.trialStatistic.totalRotation
+
+    print(totalMovement.norm(), totalRotation.norm())
+
 
     # these two only works for 2D fixed ui scene, and not the shelf scene
     # this is due to how interactions start and end from the shelf, 
@@ -472,24 +502,19 @@ def updateAllPlots(trials: 'list[Trial]', show: bool = False) -> None:
     # plotDurationOfInteractionsPerTask(trials)
     # plotDurationOfInteractionsPerTask(trials, True)
 
-    if show:
-        plt.show()
+    # plt.show()
+
+    # checkSampleRate(trials)
 
 
 if __name__ == '__main__':
     # first trials with the fixed UI:
     # logFolder = "C:\\Users\\ander\\Desktop\\final_logs_2d" 
     # test folder with improved shelf scene:
-    global logFolder
-    logFolder = "C:\\Users\\ander\\Desktop\\final_logs\\final_shelf_logs" 
-    trials = importLogFolderToTrials(logFolder, prunePlayScene=True)
-    trials = sorted(trials, key=lambda item: item.folderName)
-    for trial in trials: trial.convertBoxNameToBoxType()
+    plt.rcParams.update({'font.size': 16})
 
-    calculateStatisticsOnTrials(trials)
-    print(taskDurationStatistics(trials))
-    updateAllPlots(trials, show=False)
-
-    checkSampleRate(trials)
+    importAndMakePlots("C:\\Users\\ander\\Desktop\\final_logs\\final_shelf_logs", "Shelf UI")
+    importAndMakePlots("C:\\Users\\ander\\Desktop\\final_logs\\final_fixed2d_logs", "Fixed UI")
+    
 
     

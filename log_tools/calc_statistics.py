@@ -72,14 +72,18 @@ def calcTrialStatistics(trial: Trial) -> TrialStatistic:
     totalDuration = 0
     totalNearInteractions = 0
     totalFarInteractions = 0
+    totalRotation = Position.fromXYZ(0,0,0)
+    totalMovement = Position.fromXYZ(0,0,0)
     for scene in trial.scenes:
         totalDuration += scene.sceneStatistic.duration
         totalNearInteractions += scene.sceneStatistic.numNearInteractions
         totalFarInteractions += scene.sceneStatistic.numFarInteractions
+        totalRotation += scene.sceneStatistic.totalHeadRotation
+        totalMovement += scene.sceneStatistic.totalHeadMovement
 
     totalInteractions = totalNearInteractions + totalFarInteractions
     statistic = TrialStatistic(totalInteractions, totalNearInteractions,
-                                 totalFarInteractions, totalDuration)
+                                 totalFarInteractions, totalDuration, totalRotation, totalMovement)
     return statistic
 
 

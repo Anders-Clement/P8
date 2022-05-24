@@ -1,3 +1,4 @@
+from math import sqrt
 from dataclasses import dataclass
 import typing
 
@@ -21,8 +22,11 @@ class Position:
     def toList(self) -> 'list[float]':
         return [self.x,self.y,self.z]
 
-    def fromXYZ(x,y,z):
+    def fromXYZ(x: float, y: float, z: float):
         return Position('(' + str(x) + ',' + str(y) + ',' + str(z) + ')')
+
+    def norm(self) -> float:
+        return sqrt(self.x**2 + self.y**2 + self.z**2)
 
     def __add__(self, other):
         return Position.fromXYZ(self.x + other.x, self.y + other.y, self.z + other.z)
@@ -50,9 +54,9 @@ class PositionLog:
 
         hitName = fields[3]
         UINames = ["corner", "ContentBackPlate", "Delete", 
-                    "SpawnPlace", "SpawnPick", "Sequencing", "SpawnWP",
+                    "SpawnPlace", "SpawnPick", "SpawnWP", "Sequencing",
                     "metal_shelf", "placePrefab", "pickPrefab", "waypointPrefab",
-                    "Waypoint", "Pick", "Place"]
+                    "Waypoint", "Pick", "Place", "Trash"]
 
         if "_v" in hitName:
             hitName = "Robot_v"
@@ -64,8 +68,16 @@ class PositionLog:
             hitName = "BG"
         elif "Background" in hitName:
             hitName = "BG"
-        elif "Trash" in hitName:
-            hitName = "Trash"
+        elif "SequencingSphere" in hitName:
+            hitName = "Sequen."
+        elif hitName == "pick":
+            hitName = "Pick"
+        elif hitName == "waypoint":
+            hitName = "Waypoint"
+        elif hitName == "place":
+            hitName = "Place"
+        elif hitName == "WP":
+            hitName = "Waypoint"
         elif True in [name in hitName for name in UINames]:
             hitName = "UI"
 
@@ -106,6 +118,8 @@ class TrialStatistic:
     numNearInteractions: int
     numFarInteractions: int
     duration: float
+    totalRotation: Position
+    totalMovement: Position
 
 
 @dataclass
