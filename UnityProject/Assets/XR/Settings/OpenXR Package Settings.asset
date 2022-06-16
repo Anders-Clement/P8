@@ -1,0 +1,949 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8987223147573428149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a1f07dc5afe854f9f12a4194aca3fb, type: 3}
+  m_Name: WebGL
+  m_EditorClassIdentifier: 
+  features: []
+  m_renderMode: 1
+  m_depthSubmissionMode: 0
+--- !u!114 &-8480529755931071872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3482401f887b8864183e401715462f46, type: 3}
+  m_Name: HPMixedRealityControllerProfile WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: HP Reverb G2 Controller Profile
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.interaction.hpmixedrealitycontroller
+  openxrExtensionStrings: XR_EXT_hp_mixed_reality_controller
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &-8287070666480127388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d6ccd3d0ef0f1d458e69421dccbdae1, type: 3}
+  m_Name: ValveIndexControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Valve Index Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.valveindex
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-8256594138531613365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c8f1ce8139888c4ab621f6b3c8bb558, type: 3}
+  m_Name: MotionControllerFeaturePlugin WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Motion Controller Model
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.controller
+  openxrExtensionStrings: XR_MSFT_controller_model
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &-7227972998483999750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c8f1ce8139888c4ab621f6b3c8bb558, type: 3}
+  m_Name: MotionControllerFeaturePlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Motion Controller Model
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.controller
+  openxrExtensionStrings: XR_MSFT_controller_model
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &-7199016036132381085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3cf79659a011bd419c7a2a30eb74e9a, type: 3}
+  m_Name: EyeGazeInteraction WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Eye Gaze Interaction Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.eyetracking
+  openxrExtensionStrings: XR_EXT_eye_gaze_interaction
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-7085468865412402166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 761fdd4502cb7a84e9ec7a2b24f33f37, type: 3}
+  m_Name: MicrosoftMotionControllerProfile WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Microsoft Motion Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.microsoftmotioncontroller
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-6904432021137994329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d2e2731103cdda44af77955a0b4814c, type: 3}
+  m_Name: AppRemotingPlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Holographic Remoting remote app
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.appremoting
+  openxrExtensionStrings: XR_MSFT_holographic_remoting
+  company: Microsoft
+  priority: -100
+  required: 0
+--- !u!114 &-6325656433195866513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c8f1ce8139888c4ab621f6b3c8bb558, type: 3}
+  m_Name: MotionControllerFeaturePlugin WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Motion Controller Model
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.controller
+  openxrExtensionStrings: XR_MSFT_controller_model
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &-6274863953002302587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeef8d85de8db242bdda70cc7ff5acd, type: 3}
+  m_Name: OculusTouchControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Oculus Touch Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.oculustouch
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-6019097122628472863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f928d0d73a35f294fbe357ca17aa3547, type: 3}
+  m_Name: MicrosoftHandInteraction Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Microsoft Hand Interaction Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.handtracking
+  openxrExtensionStrings: XR_MSFT_hand_interaction
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-5466836403353351713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f8ec2975f18d5e479159feb34b4dc86, type: 3}
+  m_Name: MixedRealityFeaturePlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Mixed Reality Features
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.hololens
+  openxrExtensionStrings: XR_MSFT_holographic_window_attachment XR_KHR_win32_convert_performance_counter_time
+    XR_MSFT_unbounded_reference_space XR_MSFT_spatial_anchor XR_MSFT_secondary_view_configuration
+    XR_MSFT_first_person_observer XR_MSFT_spatial_graph_bridge XR_MSFT_perception_anchor_interop
+    XR_MSFT_spatial_anchor_persistence XR_MSFT_scene_understanding XR_MSFT_scene_understanding_serialization
+    XR_MSFT_spatial_anchor_export_preview XR_MSFT_composition_layer_reprojection
+  company: Microsoft
+  priority: 0
+  required: 1
+  disableFirstPersonObserver: 0
+--- !u!114 &-4801128151436199485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a1f07dc5afe854f9f12a4194aca3fb, type: 3}
+  m_Name: Standalone
+  m_EditorClassIdentifier: 
+  features:
+  - {fileID: -6904432021137994329}
+  - {fileID: 582592721567542367}
+  - {fileID: -2718147613166400773}
+  - {fileID: -1816153743393983799}
+  - {fileID: 2133136754665998274}
+  - {fileID: -649407458434789530}
+  - {fileID: 8048061961467037326}
+  - {fileID: -6019097122628472863}
+  - {fileID: 6154866708108087616}
+  - {fileID: 5277953314683136777}
+  - {fileID: -2848442977854162112}
+  - {fileID: -4207053568449468706}
+  - {fileID: -6274863953002302587}
+  - {fileID: 2988291748766693242}
+  - {fileID: 722413014943195921}
+  - {fileID: -8287070666480127388}
+  m_renderMode: 1
+  m_depthSubmissionMode: 2
+--- !u!114 &-4207053568449468706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c8f1ce8139888c4ab621f6b3c8bb558, type: 3}
+  m_Name: MotionControllerFeaturePlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Motion Controller Model
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.controller
+  openxrExtensionStrings: XR_MSFT_controller_model
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &-3938277682599171688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f34c86d1a130cc45a438373e1e8a4fc, type: 3}
+  m_Name: PlayModeRemotingPlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Holographic Remoting for Play Mode
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.playmoderemoting
+  openxrExtensionStrings: XR_MSFT_holographic_remoting
+  company: Microsoft
+  priority: -100
+  required: 0
+  m_remoteHostName: 
+  m_remoteHostPort: 8265
+  m_maxBitrate: 20000
+  m_videoCodec: 0
+  m_enableAudio: 0
+--- !u!114 &-2848442977854162112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7de993716e042c6499d0c18eed3a773c, type: 3}
+  m_Name: MockRuntime Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Mock Runtime
+  version: 0.0.2
+  featureIdInternal: com.unity.openxr.feature.mockruntime
+  openxrExtensionStrings: XR_UNITY_null_gfx
+  company: Unity
+  priority: 0
+  required: 0
+  ignoreValidationErrors: 0
+--- !u!114 &-2718147613166400773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3cf79659a011bd419c7a2a30eb74e9a, type: 3}
+  m_Name: EyeGazeInteraction Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Eye Gaze Interaction Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.eyetracking
+  openxrExtensionStrings: XR_EXT_eye_gaze_interaction
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-2050645195606595980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f8ec2975f18d5e479159feb34b4dc86, type: 3}
+  m_Name: MixedRealityFeaturePlugin WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Mixed Reality Features
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.hololens
+  openxrExtensionStrings: XR_MSFT_holographic_window_attachment XR_KHR_win32_convert_performance_counter_time
+    XR_MSFT_unbounded_reference_space XR_MSFT_spatial_anchor XR_MSFT_secondary_view_configuration
+    XR_MSFT_first_person_observer XR_MSFT_spatial_graph_bridge XR_MSFT_perception_anchor_interop
+    XR_MSFT_spatial_anchor_persistence XR_MSFT_scene_understanding XR_MSFT_scene_understanding_serialization
+    XR_MSFT_spatial_anchor_export_preview XR_MSFT_composition_layer_reprojection
+  company: Microsoft
+  priority: 0
+  required: 1
+  disableFirstPersonObserver: 0
+--- !u!114 &-1816153743393983799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c79c911b38743a649b1c1eddb5097202, type: 3}
+  m_Name: HandTrackingFeaturePlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Hand Tracking
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.handtracking
+  openxrExtensionStrings: XR_EXT_hand_tracking XR_MSFT_hand_tracking_mesh
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &-1425327740907218305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d6ccd3d0ef0f1d458e69421dccbdae1, type: 3}
+  m_Name: ValveIndexControllerProfile WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Valve Index Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.valveindex
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-734498827701658842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056125dd64c0ed540b40a4af74f7b495, type: 3}
+  m_Name: RuntimeDebuggerOpenXRFeature WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Runtime Debugger
+  version: 1
+  featureIdInternal: com.unity.openxr.features.runtimedebugger
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+  cacheSize: 1048576
+  perThreadCacheSize: 51200
+--- !u!114 &-649407458434789530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 274c02963f889a64e90bc2e596e21d13, type: 3}
+  m_Name: HTCViveControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: HTC Vive Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.htcvive
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &-340184096856454807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a1f07dc5afe854f9f12a4194aca3fb, type: 3}
+  m_Name: WSA
+  m_EditorClassIdentifier: 
+  features:
+  - {fileID: 6645550439077622017}
+  - {fileID: 4873456284397740938}
+  - {fileID: -7199016036132381085}
+  - {fileID: 8058995584556327254}
+  - {fileID: 4576377753213131503}
+  - {fileID: 256273304938347114}
+  - {fileID: 3188176336308784970}
+  - {fileID: 3068816954632786285}
+  - {fileID: -7085468865412402166}
+  - {fileID: -2050645195606595980}
+  - {fileID: -8256594138531613365}
+  - {fileID: 4024071336296624307}
+  - {fileID: -734498827701658842}
+  - {fileID: -1425327740907218305}
+  m_renderMode: 1
+  m_depthSubmissionMode: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f0ebc320a151d3408ea1e9fce54d40e, type: 3}
+  m_Name: OpenXR Package Settings
+  m_EditorClassIdentifier: 
+  Keys: 010000000d0000000e000000
+  Values:
+  - {fileID: -4801128151436199485}
+  - {fileID: -8987223147573428149}
+  - {fileID: -340184096856454807}
+--- !u!114 &256273304938347114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 274c02963f889a64e90bc2e596e21d13, type: 3}
+  m_Name: HTCViveControllerProfile WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: HTC Vive Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.htcvive
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &582592721567542367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 486b5e28864f9a94b979b9620ce5006d, type: 3}
+  m_Name: ConformanceAutomationFeature Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Conformance Automation
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.conformance
+  openxrExtensionStrings: XR_EXT_conformance_automation
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &679652349716855008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f8ec2975f18d5e479159feb34b4dc86, type: 3}
+  m_Name: MixedRealityFeaturePlugin WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Mixed Reality Features
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.hololens
+  openxrExtensionStrings: XR_MSFT_holographic_window_attachment XR_KHR_win32_convert_performance_counter_time
+    XR_MSFT_unbounded_reference_space XR_MSFT_spatial_anchor XR_MSFT_secondary_view_configuration
+    XR_MSFT_first_person_observer XR_MSFT_spatial_graph_bridge XR_MSFT_perception_anchor_interop
+    XR_MSFT_spatial_anchor_persistence XR_MSFT_scene_understanding XR_MSFT_scene_understanding_serialization
+    XR_MSFT_spatial_anchor_export_preview XR_MSFT_composition_layer_reprojection
+  company: Microsoft
+  priority: 0
+  required: 1
+  disableFirstPersonObserver: 0
+--- !u!114 &722413014943195921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056125dd64c0ed540b40a4af74f7b495, type: 3}
+  m_Name: RuntimeDebuggerOpenXRFeature Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Runtime Debugger
+  version: 1
+  featureIdInternal: com.unity.openxr.features.runtimedebugger
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+  cacheSize: 1048576
+  perThreadCacheSize: 51200
+--- !u!114 &2133136754665998274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3482401f887b8864183e401715462f46, type: 3}
+  m_Name: HPMixedRealityControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: HP Reverb G2 Controller Profile
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.interaction.hpmixedrealitycontroller
+  openxrExtensionStrings: XR_EXT_hp_mixed_reality_controller
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &2448565934795970267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3482401f887b8864183e401715462f46, type: 3}
+  m_Name: HPMixedRealityControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: HP Reverb G2 Controller Profile
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.interaction.hpmixedrealitycontroller
+  openxrExtensionStrings: XR_EXT_hp_mixed_reality_controller
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &2618811507012118252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d2e2731103cdda44af77955a0b4814c, type: 3}
+  m_Name: AppRemotingPlugin WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Holographic Remoting remote app
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.appremoting
+  openxrExtensionStrings: XR_MSFT_holographic_remoting
+  company: Microsoft
+  priority: -100
+  required: 0
+--- !u!114 &2988291748766693242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f34c86d1a130cc45a438373e1e8a4fc, type: 3}
+  m_Name: PlayModeRemotingPlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Holographic Remoting for Play Mode
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.playmoderemoting
+  openxrExtensionStrings: XR_MSFT_holographic_remoting
+  company: Microsoft
+  priority: -100
+  required: 0
+  m_remoteHostName: 
+  m_remoteHostPort: 8265
+  m_maxBitrate: 20000
+  m_videoCodec: 0
+  m_enableAudio: 0
+--- !u!114 &3068816954632786285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f928d0d73a35f294fbe357ca17aa3547, type: 3}
+  m_Name: MicrosoftHandInteraction WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Microsoft Hand Interaction Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.handtracking
+  openxrExtensionStrings: XR_MSFT_hand_interaction
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &3188176336308784970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6bfdbcb316ed242b30a8798c9eb853, type: 3}
+  m_Name: KHRSimpleControllerProfile WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Khronos Simple Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.khrsimpleprofile
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &4024071336296624307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeef8d85de8db242bdda70cc7ff5acd, type: 3}
+  m_Name: OculusTouchControllerProfile WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Oculus Touch Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.oculustouch
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &4576377753213131503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3482401f887b8864183e401715462f46, type: 3}
+  m_Name: HPMixedRealityControllerProfile WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: HP Reverb G2 Controller Profile
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.interaction.hpmixedrealitycontroller
+  openxrExtensionStrings: XR_EXT_hp_mixed_reality_controller
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &4873456284397740938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 486b5e28864f9a94b979b9620ce5006d, type: 3}
+  m_Name: ConformanceAutomationFeature WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Conformance Automation
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.conformance
+  openxrExtensionStrings: XR_EXT_conformance_automation
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &5277953314683136777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f8ec2975f18d5e479159feb34b4dc86, type: 3}
+  m_Name: MixedRealityFeaturePlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Mixed Reality Features
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.hololens
+  openxrExtensionStrings: XR_MSFT_holographic_window_attachment XR_KHR_win32_convert_performance_counter_time
+    XR_MSFT_unbounded_reference_space XR_MSFT_spatial_anchor XR_MSFT_secondary_view_configuration
+    XR_MSFT_first_person_observer XR_MSFT_spatial_graph_bridge XR_MSFT_perception_anchor_interop
+    XR_MSFT_spatial_anchor_persistence XR_MSFT_scene_understanding XR_MSFT_scene_understanding_serialization
+    XR_MSFT_spatial_anchor_export_preview XR_MSFT_composition_layer_reprojection
+  company: Microsoft
+  priority: 0
+  required: 1
+  disableFirstPersonObserver: 0
+--- !u!114 &6154866708108087616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 761fdd4502cb7a84e9ec7a2b24f33f37, type: 3}
+  m_Name: MicrosoftMotionControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Microsoft Motion Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.microsoftmotioncontroller
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &6645550439077622017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d2e2731103cdda44af77955a0b4814c, type: 3}
+  m_Name: AppRemotingPlugin WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Holographic Remoting remote app
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.appremoting
+  openxrExtensionStrings: XR_MSFT_holographic_remoting
+  company: Microsoft
+  priority: -100
+  required: 0
+--- !u!114 &7914982034715162761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d2e2731103cdda44af77955a0b4814c, type: 3}
+  m_Name: AppRemotingPlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Holographic Remoting remote app
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.appremoting
+  openxrExtensionStrings: XR_MSFT_holographic_remoting
+  company: Microsoft
+  priority: -100
+  required: 0
+--- !u!114 &8048061961467037326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6bfdbcb316ed242b30a8798c9eb853, type: 3}
+  m_Name: KHRSimpleControllerProfile Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Khronos Simple Controller Profile
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.khrsimpleprofile
+  openxrExtensionStrings: 
+  company: Unity
+  priority: 0
+  required: 0
+--- !u!114 &8058995584556327254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c79c911b38743a649b1c1eddb5097202, type: 3}
+  m_Name: HandTrackingFeaturePlugin WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Hand Tracking
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.handtracking
+  openxrExtensionStrings: XR_EXT_hand_tracking XR_MSFT_hand_tracking_mesh
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &8357010647385938300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c79c911b38743a649b1c1eddb5097202, type: 3}
+  m_Name: HandTrackingFeaturePlugin WSA
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Hand Tracking
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.handtracking
+  openxrExtensionStrings: XR_EXT_hand_tracking XR_MSFT_hand_tracking_mesh
+  company: Microsoft
+  priority: 0
+  required: 0
+--- !u!114 &9217247735514095856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c79c911b38743a649b1c1eddb5097202, type: 3}
+  m_Name: HandTrackingFeaturePlugin Standalone
+  m_EditorClassIdentifier: 
+  m_enabled: 1
+  nameUi: Hand Tracking
+  version: 1.4.0
+  featureIdInternal: com.microsoft.openxr.feature.handtracking
+  openxrExtensionStrings: XR_EXT_hand_tracking XR_MSFT_hand_tracking_mesh
+  company: Microsoft
+  priority: 0
+  required: 0

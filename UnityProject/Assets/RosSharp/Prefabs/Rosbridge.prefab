@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3064757730412134010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3064757730412134008}
+  - component: {fileID: 3064757730412134009}
+  - component: {fileID: 3064757730412133987}
+  - component: {fileID: 3064757730412134012}
+  - component: {fileID: 7098268849870976883}
+  m_Layer: 0
+  m_Name: Rosbridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3064757730412134008
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3064757730412134010}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.063427374, y: 0.5844394, z: 7.3805346}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3064757730412134009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3064757730412134010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff98778ae051cfd40a6e4effdf851ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SecondsTimeout: 10
+  Serializer: 1
+  protocol: 1
+  RosBridgeServerUrl: ws://172.31.1.157:9090
+  RosStatus: None
+  connected: 0
+--- !u!114 &3064757730412133987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3064757730412134010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fe4cf3b1dd3507418f7ec019f9193ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Topic: /joint_states
+  TimeStep: 0
+  JointNames:
+  - shoulder_pan_joint
+  - shoulder_lift_joint
+  - elbow_joint
+  - wrist_1_joint
+  - wrist_2_joint
+  - wrist_3_joint
+  JointStateWriters:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+--- !u!114 &3064757730412134012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3064757730412134010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fe4cf3b1dd3507418f7ec019f9193ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Topic: /joint_states_visualizer
+  TimeStep: 0
+  JointNames:
+  - shoulder_pan_joint
+  - shoulder_lift_joint
+  - elbow_joint
+  - wrist_1_joint
+  - wrist_2_joint
+  - wrist_3_joint
+  JointStateWriters:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+--- !u!114 &7098268849870976883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3064757730412134010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5df100b5e70287e4084285bf17df1845, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Topic: /boxes

@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/ManagerScene.unity
+    guid: 360a1afd415928e459b3ed7e6fd43db2
+  - enabled: 0
+    path: Assets/Scenes/HoloLensScene.unity
+    guid: 769a4066d644e4c428c0c5b90ec2168e
+  - enabled: 0
+    path: Assets/Scenes/3D_UIs/[2]Testing3DCratesScene.unity
+    guid: 48316b37d05311b49b5343e17222b894
+  - enabled: 0
+    path: Assets/Scenes/2D_UIs/[4]FAB.unity
+    guid: 0a571e9ce92f8ea40ae13703431a1d9c
+  - enabled: 0
+    path: Assets/Scenes/2D_UIs/[5]FixedUI.unity
+    guid: 5c6b090925687f942b87aaa2f05e82b4
+  - enabled: 0
+    path: Assets/Scenes/3D_UIs/[1]Testing3DShelvesScene.unity
+    guid: 418df849d3a844648a78364a1516a963
+  - enabled: 0
+    path: Assets/Scenes/2D_UIs/[3]FloatingUI.unity
+    guid: 4d97d7d5fcf0c4243ab612b14caea9ca
+  - enabled: 0
+    path: Assets/Scenes/TestScenes/Test1.unity
+    guid: 8f96a4a4c0d18ac408de81787d52657f
+  - enabled: 0
+    path: Assets/Scenes/TestScenes/Test2.unity
+    guid: cb3daf639f1b1734fa4a59ea3a170ed7
+  - enabled: 0
+    path: Assets/Scenes/LightingScene.unity
+    guid: a31e4a9fa864ed045a0da04a4827b1b3
+  - enabled: 0
+    path: Assets/Scenes/TestScenes/finalTesting.unity
+    guid: de3337145f4adc3409080c0a1ce0ebb8
+  - enabled: 0
+    path: Assets/Scenes/PlayScene.unity
+    guid: a556284c6728b50459e1e95d56915cd9
+  - enabled: 0
+    path: Assets/Scenes/TestScenes/finalPlayscene.unity
+    guid: b983cebc3772b7c48a2dd88d2ee8cef4
+  - enabled: 1
+    path: Assets/Scenes/TestScenes/ShelfImproved.unity
+    guid: b143fd932c5083143945d4d61ee3208c
+  - enabled: 1
+    path: Assets/Scenes/TestScenes/ShelfPlayScene.unity
+    guid: 21c97a645bbbf4e41bee7bcfacb541bb
+  m_configObjects:
+    Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: ac043213625258642be5eceb90de7d46, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: b61274931cd558d49849bbe2e0aacea5, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 13d6790fe1614564dbbd5f6ce9b1f0ea, type: 2}
